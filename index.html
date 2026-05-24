@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athenyx — AI Advisory & Governance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080810;
+    --white: #f8f8fc;
+    --gray-100: #f0f0f5;
+    --gray-200: #e0e0ea;
+    --gray-400: #9090a8;
+    --gray-600: #50506a;
+    --gold: #C8A96E;
+    --gold-light: #f5edd8;
+    --gold-dark: #a07840;
+    --navy: #0d0d24;
+    --navy-mid: #141432;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* Smooth scroll — uses native CSS + JS polyfill for consistent easing */
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 72px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--white);
+    color: var(--black);
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 56px; height: 64px;
+    background: rgba(248,248,252,0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--gray-200);
+    transition: box-shadow .3s;
+  }
+  nav.scrolled { box-shadow: 0 2px 24px rgba(0,0,0,0.07); }
+
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 500;
+    color: var(--black); text-decoration: none; letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .nav-logo span { color: var(--gold); }
+
+  .nav-center {
+    display: flex; align-items: center; gap: 36px;
+    position: absolute; left: 50%; transform: translateX(-50%);
+  }
+  .nav-center a {
+    font-size: 13px; font-weight: 400; color: var(--gray-600);
+    text-decoration: none; letter-spacing: 0.02em; transition: color .2s;
+    cursor: pointer;
+  }
+  .nav-center a:hover { color: var(--black); }
+
+  /* Mobile menu */
+  .nav-hamburger {
+    display: none;
+    flex-direction: column; gap: 5px; cursor: pointer;
+    padding: 8px; border: none; background: none;
+  }
+  .nav-hamburger span {
+    width: 22px; height: 2px; background: var(--black);
+    transition: all .3s; display: block; border-radius: 2px;
+  }
+  .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+  .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .mobile-menu {
+    display: none; position: fixed; top: 64px; left: 0; right: 0;
+    background: rgba(248,248,252,0.98); backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--gray-200); z-index: 199;
+    padding: 24px; flex-direction: column; gap: 4px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    font-size: 15px; font-weight: 400; color: var(--gray-600);
+    text-decoration: none; padding: 12px 8px; border-radius: 8px;
+    transition: all .2s; cursor: pointer;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .mobile-menu a:hover { color: var(--black); background: var(--gray-100); }
+  .mobile-menu .mobile-cta {
+    margin-top: 16px; padding: 14px; border-radius: 8px;
+    background: var(--black); color: var(--white) !important;
+    text-align: center; font-weight: 500;
+    border-bottom: none;
+  }
+
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+
+  .btn-ghost {
+    font-size: 13px; font-weight: 400; color: var(--gray-600);
+    text-decoration: none; padding: 7px 16px; border-radius: 6px;
+    border: 1px solid transparent; transition: all .2s; cursor: pointer;
+    background: none; font-family: 'DM Sans', sans-serif;
+  }
+  .btn-ghost:hover { color: var(--black); border-color: var(--gray-200); background: var(--gray-100); }
+
+  .btn-gold {
+    font-size: 13px; font-weight: 500; color: var(--gold-dark);
+    text-decoration: none; padding: 8px 20px; border-radius: 6px;
+    background: var(--gold-light); border: 1px solid #e0c98a;
+    transition: all .2s; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.02em;
+  }
+  .btn-gold:hover { background: #eddcb0; }
+
+  .btn-dark {
+    font-size: 13px; font-weight: 500; color: var(--white);
+    text-decoration: none; padding: 8px 20px; border-radius: 6px;
+    background: var(--black); border: 1px solid var(--black);
+    transition: all .2s; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+  .btn-dark:hover { background: #1a1a30; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 130px 48px 90px;
+    position: relative; overflow: hidden;
+    background: var(--navy);
+  }
+
+  .hero-noise {
+    position: absolute; inset: 0; opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px; pointer-events: none;
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(200,169,110,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,169,110,0.06) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, black 20%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, black 20%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .hero-glow {
+    position: absolute; width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(200,169,110,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%, -60%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    position: relative;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 500; color: var(--gold);
+    background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.3);
+    padding: 5px 16px; border-radius: 20px; margin-bottom: 36px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .hero-badge::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--gold); border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero h1 {
+    position: relative;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(52px, 8vw, 96px); font-weight: 400;
+    line-height: 1.0; letter-spacing: -1px; color: var(--white);
+    max-width: 860px; margin-bottom: 28px;
+  }
+  .hero h1 em { font-style: italic; color: var(--gold); }
+
+  .hero p {
+    position: relative;
+    font-size: 17px; font-weight: 300; color: rgba(248,248,252,0.65);
+    max-width: 520px; line-height: 1.75; margin-bottom: 48px;
+  }
+
+  .hero-cta {
+    position: relative;
+    display: flex; align-items: center; gap: 16px;
+    flex-wrap: wrap; justify-content: center;
+  }
+
+  .btn-hero-primary {
+    font-size: 15px; font-weight: 500; color: var(--navy);
+    text-decoration: none; padding: 15px 34px; border-radius: 8px;
+    background: var(--gold); border: 1px solid var(--gold);
+    transition: all .25s; letter-spacing: 0.02em; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-hero-primary:hover { background: #d4b578; transform: translateY(-1px); box-shadow: 0 8px 32px rgba(200,169,110,0.35); }
+
+  .btn-hero-outline {
+    font-size: 15px; font-weight: 400; color: rgba(248,248,252,0.8);
+    text-decoration: none; padding: 15px 34px; border-radius: 8px;
+    background: transparent; border: 1px solid rgba(248,248,252,0.2);
+    transition: all .25s; cursor: pointer;
+  }
+  .btn-hero-outline:hover { border-color: rgba(248,248,252,0.5); background: rgba(248,248,252,0.05); }
+
+  .hero-trust {
+    position: relative;
+    display: flex; align-items: center; gap: 40px;
+    margin-top: 80px; padding-top: 48px;
+    border-top: 1px solid rgba(248,248,252,0.1);
+    flex-wrap: wrap; justify-content: center;
+  }
+  .trust-item { text-align: center; }
+  .trust-label {
+    font-size: 11px; font-weight: 500; color: var(--gold);
+    letter-spacing: 0.1em; text-transform: uppercase; display: block;
+    margin-bottom: 4px;
+  }
+  .trust-sub { font-size: 12px; color: rgba(248,248,252,0.4); }
+  .trust-divider { width: 1px; height: 32px; background: rgba(248,248,252,0.1); }
+
+  /* ── SECTION BASE ── */
+  section { padding: 120px 56px; }
+  .section-label {
+    font-size: 11px; font-weight: 500; color: var(--gold);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(34px, 4vw, 54px); font-weight: 400;
+    line-height: 1.08; letter-spacing: -0.5px; color: var(--black);
+    max-width: 640px; margin-bottom: 20px;
+  }
+  .section-sub {
+    font-size: 16px; font-weight: 300; color: var(--gray-600);
+    max-width: 500px; line-height: 1.75; margin-bottom: 64px;
+  }
+  .section-title em { font-style: italic; color: var(--gold-dark); }
+
+  /* ── TRUST STRIP ── */
+  .trust-strip {
+    padding: 36px 56px; background: var(--black);
+    display: flex; align-items: center; justify-content: center; gap: 56px;
+    flex-wrap: wrap;
+  }
+  .trust-pill {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 400; color: rgba(248,248,252,0.6);
+    letter-spacing: 0.02em;
+  }
+  .trust-pill .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0;
+  }
+
+  /* ── SERVICES ── */
+  .services { background: var(--white); }
+  .services-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .service-card {
+    border: 1px solid var(--gray-200); border-radius: 12px;
+    padding: 36px 30px; transition: all .25s; cursor: default;
+    background: var(--white); position: relative; overflow: hidden;
+  }
+  .service-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    opacity: 0; transition: opacity .3s;
+  }
+  .service-card:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.07); }
+  .service-card:hover::before { opacity: 1; }
+
+  .service-icon {
+    font-size: 22px; margin-bottom: 18px;
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--gold-light); display: flex; align-items: center; justify-content: center;
+  }
+  .service-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px; font-weight: 500; color: var(--black); margin-bottom: 10px;
+  }
+  .service-card p { font-size: 14px; color: var(--gray-600); line-height: 1.65; }
+
+  /* ── GOVERNANCE DIMENSIONS (static text) ── */
+  .dim-toggle {
+    margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--gray-200);
+  }
+
+  /* ── HOW WE WORK ── */
+  .how { background: var(--navy); color: var(--white); }
+  .how .section-label { color: var(--gold); }
+  .how .section-title { color: var(--white); }
+  .how .section-sub { color: rgba(248,248,252,0.55); }
+
+  .how-steps {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 0; position: relative;
+  }
+  .how-steps::before {
+    content: ''; position: absolute;
+    top: 28px; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,169,110,0.4), transparent);
+  }
+  .how-step { padding: 0 16px; text-align: center; }
+  .step-num {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--navy-mid); border: 1px solid rgba(200,169,110,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--gold);
+    margin: 0 auto 22px; position: relative; z-index: 1;
+    transition: background .3s, border-color .3s;
+  }
+  .how-step:hover .step-num { background: rgba(200,169,110,0.15); border-color: var(--gold); }
+  .how-step h3 { font-size: 14px; font-weight: 500; color: var(--white); margin-bottom: 8px; letter-spacing: 0.01em; }
+  .how-step p { font-size: 13px; color: rgba(248,248,252,0.45); line-height: 1.6; }
+  .step-tag {
+    font-size: 10px; font-weight: 500; color: var(--gold);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;
+    display: block;
+  }
+
+  /* ── INDUSTRIES ── */
+  .industries { background: var(--gray-100); }
+  .industries-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  .industry-card {
+    background: var(--white); border: 1px solid var(--gray-200);
+    border-radius: 10px; padding: 28px 24px;
+    display: flex; align-items: flex-start; gap: 16px;
+    transition: all .2s;
+  }
+  .industry-card:hover { border-color: var(--gold); box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+  .industry-icon { font-size: 22px; flex-shrink: 0; }
+  .industry-card h4 { font-size: 15px; font-weight: 500; color: var(--black); margin-bottom: 4px; }
+  .industry-card p { font-size: 13px; color: var(--gray-600); line-height: 1.55; }
+
+  /* Legal spans full row */
+  .industry-card.full-width { grid-column: 1 / -1; }
+
+  /* ── WHY ATHENYX ── */
+  .why { background: var(--white); }
+  .why-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .why-item {
+    padding: 32px 28px; border: 1px solid var(--gray-200); border-radius: 12px;
+    transition: all .25s;
+  }
+  .why-item:hover { border-color: var(--gold); background: #fffcf6; }
+  .why-num {
+    font-family: 'Cormorant Garamond', serif; font-size: 40px;
+    color: var(--gray-200); line-height: 1; margin-bottom: 16px;
+  }
+  .why-item h4 { font-size: 16px; font-weight: 500; color: var(--black); margin-bottom: 8px; }
+  .why-item p { font-size: 14px; color: var(--gray-600); line-height: 1.65; }
+
+  /* ── CASE STUDIES ── */
+  .cases { background: var(--navy); color: var(--white); }
+  .cases .section-label { color: var(--gold); }
+  .cases .section-title { color: var(--white); }
+  .cases .section-sub { color: rgba(248,248,252,0.55); }
+  .cases-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+  }
+  .case-card {
+    background: var(--navy-mid); border: 1px solid rgba(200,169,110,0.15);
+    border-radius: 12px; padding: 36px 32px; transition: all .25s;
+  }
+  .case-card:hover { border-color: rgba(200,169,110,0.4); background: rgba(200,169,110,0.05); }
+  .case-tag {
+    font-size: 11px; font-weight: 500; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; display: block;
+  }
+  .case-card h3 {
+    font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500;
+    color: var(--white); margin-bottom: 12px;
+  }
+  .case-card p { font-size: 14px; color: rgba(248,248,252,0.5); line-height: 1.65; margin-bottom: 20px; }
+  .case-result {
+    font-size: 12px; font-weight: 500; color: var(--gold);
+    background: rgba(200,169,110,0.12); border: 1px solid rgba(200,169,110,0.2);
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+  }
+
+  /* ── TRAINING ── */
+  .training { background: var(--gray-100); }
+  .training-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .training-card {
+    background: var(--white); border: 1px solid var(--gray-200);
+    border-radius: 12px; padding: 32px 28px; transition: all .25s;
+  }
+  .training-card:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.06); }
+  .training-level {
+    font-size: 11px; font-weight: 500; color: var(--gold-dark);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; display: block;
+  }
+  .training-card h3 {
+    font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500;
+    color: var(--black); margin-bottom: 8px;
+  }
+  .training-card p { font-size: 14px; color: var(--gray-600); line-height: 1.6; }
+
+  /* ── ABOUT ── */
+  .about { background: var(--white); }
+  .about-layout {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;
+  }
+  .about-text h3 {
+    font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 500;
+    color: var(--black); margin-bottom: 16px; letter-spacing: -0.3px;
+  }
+  .about-text p { font-size: 15px; color: var(--gray-600); line-height: 1.75; margin-bottom: 16px; }
+  .about-mission {
+    background: var(--gold-light); border: 1px solid #e0c98a;
+    border-radius: 12px; padding: 28px 24px; margin-top: 28px;
+  }
+  .about-mission p {
+    font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400;
+    font-style: italic; color: var(--black); line-height: 1.5; margin: 0;
+  }
+
+  .dept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .dept-card {
+    background: var(--gray-100); border: 1px solid var(--gray-200);
+    border-radius: 12px; padding: 22px 20px; transition: all .2s;
+  }
+  .dept-card:hover { border-color: var(--gold); background: #fffcf6; }
+  .dept-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .dept-icon { font-size: 20px; }
+  .dept-name { font-size: 14px; font-weight: 500; color: var(--black); }
+  .dept-people { display: flex; gap: 5px; flex-wrap: wrap; }
+  .person-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--black); border: 2px solid var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .person-dot.gold { background: var(--gold-light); border-color: #e0c98a; color: var(--gold-dark); }
+
+  /* ── CTA / CONTACT STRIP ── */
+  .cta-strip {
+    padding: 100px 56px; background: var(--black); text-align: center;
+  }
+  .cta-strip h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(38px, 5vw, 68px); font-weight: 400;
+    letter-spacing: -1px; color: var(--white);
+    max-width: 680px; margin: 0 auto 16px; line-height: 1.05;
+  }
+  .cta-strip h2 em { font-style: italic; color: var(--gold); }
+  .cta-strip p { font-size: 16px; color: rgba(248,248,252,0.5); margin-bottom: 40px; }
+  .cta-strip-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--gray-200); padding: 44px 56px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500;
+    color: var(--black); text-decoration: none; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .footer-logo span { color: var(--gold); }
+  .footer-links { display: flex; gap: 28px; flex-wrap: wrap; }
+  .footer-links a { font-size: 13px; color: var(--gray-400); text-decoration: none; transition: color .2s; cursor: pointer; }
+  .footer-links a:hover { color: var(--black); }
+  .footer-copy { font-size: 12px; color: var(--gray-400); }
+
+  /* ── FADE ANIMATIONS ── */
+  .fade-up { opacity: 0; transform: translateY(28px); transition: opacity .75s ease, transform .75s ease; }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(8,8,16,0.75); backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: var(--white); border-radius: 16px;
+    padding: 48px 44px; width: 100%; max-width: 520px;
+    position: relative; animation: slideUp .3s ease;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.25);
+    max-height: 90vh; overflow-y: auto;
+  }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .modal-close {
+    position: absolute; top: 18px; right: 18px;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--gray-100); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: var(--gray-600); transition: background .2s;
+  }
+  .modal-close:hover { background: var(--gray-200); }
+
+  .modal h3 {
+    font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500;
+    color: var(--black); margin-bottom: 6px; letter-spacing: -0.3px;
+  }
+  .modal p.modal-sub { font-size: 14px; color: var(--gray-600); margin-bottom: 32px; }
+
+  .form-group { margin-bottom: 18px; }
+  .form-group label {
+    display: block; font-size: 12px; font-weight: 500;
+    color: var(--gray-600); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 11px 14px; border-radius: 8px;
+    border: 1px solid var(--gray-200); background: var(--white);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--black);
+    outline: none; transition: border-color .2s; resize: vertical;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--gold);
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .btn-submit {
+    width: 100%; padding: 14px; border-radius: 8px;
+    background: var(--black); color: var(--white); border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    cursor: pointer; transition: background .2s; letter-spacing: 0.02em; margin-top: 8px;
+  }
+  .btn-submit:hover { background: #1a1a30; }
+  .modal-contact-alt {
+    text-align: center; margin-top: 20px; font-size: 13px; color: var(--gray-400);
+  }
+  .modal-contact-alt a { color: var(--gold-dark); text-decoration: none; }
+  .modal-contact-alt a:hover { text-decoration: underline; }
+
+  /* ── LANGUAGE TOGGLE ── */
+  .lang-toggle {
+    display: flex; align-items: center; gap: 0;
+    background: var(--gray-100); border: 1px solid var(--gray-200);
+    border-radius: 20px; padding: 3px; position: relative;
+    cursor: pointer; user-select: none;
+  }
+  .lang-toggle-track {
+    display: flex; align-items: center; gap: 0;
+  }
+  .lang-option {
+    font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+    padding: 4px 10px; border-radius: 16px;
+    transition: color .25s; color: var(--gray-400);
+    position: relative; z-index: 1; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .lang-option.active { color: var(--black); }
+  .lang-slider {
+    position: absolute; top: 3px; left: 3px;
+    height: calc(100% - 6px);
+    background: var(--white); border-radius: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+
+  /* ── CONTACT SECTION ── */
+  .contact-section { background: var(--white); }
+  .contact-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .contact-info h3 {
+    font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 500;
+    color: var(--black); margin-bottom: 16px;
+  }
+  .contact-info p { font-size: 15px; color: var(--gray-600); line-height: 1.7; margin-bottom: 32px; }
+  .contact-links { display: flex; flex-direction: column; gap: 14px; }
+  .contact-link {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 14px; color: var(--gray-600); text-decoration: none;
+    padding: 14px 18px; border: 1px solid var(--gray-200); border-radius: 10px;
+    transition: all .2s;
+  }
+  .contact-link:hover { border-color: var(--gold); color: var(--black); }
+  .contact-link .link-icon { font-size: 18px; }
+
+  .contact-form-inline .form-group input,
+  .contact-form-inline .form-group textarea,
+  .contact-form-inline .form-group select {
+    background: var(--gray-100); border-color: var(--gray-200);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 960px) {
+    nav { padding: 0 20px; }
+    .nav-center { display: none; }
+    .nav-right .btn-ghost { display: none; }
+    .nav-hamburger { display: flex; }
+    section { padding: 80px 20px; }
+    .hero { padding: 110px 20px 70px; }
+    .hero-trust { gap: 16px; }
+    .trust-divider { display: none; }
+    .trust-strip { gap: 20px; padding: 28px 20px; }
+    .services-grid { grid-template-columns: 1fr; }
+    .how-steps { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+    .how-steps::before { display: none; }
+    .industries-grid { grid-template-columns: 1fr 1fr; }
+    .industry-card.full-width { grid-column: 1 / -1; }
+    .why-grid { grid-template-columns: 1fr; }
+    .cases-grid { grid-template-columns: 1fr; }
+    .training-grid { grid-template-columns: 1fr; }
+    .about-layout { grid-template-columns: 1fr; gap: 40px; }
+    .dept-grid { grid-template-columns: 1fr 1fr; }
+    .contact-layout { grid-template-columns: 1fr; gap: 40px; }
+    footer { flex-direction: column; text-align: center; padding: 40px 20px; }
+    .footer-links { justify-content: center; gap: 16px; }
+    .cta-strip { padding: 80px 20px; }
+    .modal { padding: 32px 24px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .hero h1 { font-size: clamp(42px, 12vw, 64px); }
+    .industries-grid { grid-template-columns: 1fr; }
+    .industry-card.full-width { grid-column: 1; }
+    .dept-grid { grid-template-columns: 1fr; }
+    .why-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav id="main-nav">
+  <a href="#" class="nav-logo" onclick="smoothScrollTo('hero'); return false;">Athenyx<span>.</span></a>
+  <div class="nav-center">
+    <a onclick="smoothScrollTo('services')" data-en="Services" data-de="Leistungen">Services</a>
+    <a onclick="smoothScrollTo('how')" data-en="How We Work" data-de="Unsere Methode">How We Work</a>
+    <a onclick="smoothScrollTo('cases')" data-en="Case Studies" data-de="Referenzprojekte">Case Studies</a>
+    <a onclick="smoothScrollTo('training')" data-en="Training" data-de="Schulungen">Training</a>
+    <a onclick="smoothScrollTo('about')" data-en="About" data-de="Über uns">About</a>
+    <a onclick="smoothScrollTo('contact')" data-en="Contact" data-de="Kontakt">Contact</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-toggle" id="lang-toggle" onclick="toggleLang()">
+      <div class="lang-slider" id="lang-slider"></div>
+      <div class="lang-toggle-track">
+        <span class="lang-option active" id="lang-en">EN</span>
+        <span class="lang-option" id="lang-de">DE</span>
+      </div>
+    </div>
+    <button class="btn-ghost" onclick="openModal()" data-en="Book Consultation" data-de="Beratung buchen">Book Consultation</button>
+    <button class="btn-dark" onclick="smoothScrollTo('services')" data-en="Explore Services" data-de="Leistungen entdecken">Explore Services</button>
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <a onclick="smoothScrollTo('services'); closeMobileMenu()" data-en="Services" data-de="Leistungen">Services</a>
+  <a onclick="smoothScrollTo('how'); closeMobileMenu()" data-en="How We Work" data-de="Unsere Methode">How We Work</a>
+  <a onclick="smoothScrollTo('cases'); closeMobileMenu()" data-en="Case Studies" data-de="Referenzprojekte">Case Studies</a>
+  <a onclick="smoothScrollTo('training'); closeMobileMenu()" data-en="Training" data-de="Schulungen">Training</a>
+  <a onclick="smoothScrollTo('about'); closeMobileMenu()" data-en="About" data-de="Über uns">About</a>
+  <a onclick="smoothScrollTo('contact'); closeMobileMenu()" data-en="Contact" data-de="Kontakt">Contact</a>
+  <a class="mobile-cta" onclick="openModal(); closeMobileMenu()" data-en="Book a Consultation" data-de="Beratung buchen">Book a Consultation</a>
+</div>
+
+<!-- ── HERO ── -->
+<section class="hero" id="hero">
+  <div class="hero-noise" aria-hidden="true"></div>
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-glow" aria-hidden="true"></div>
+
+  <div class="hero-badge" data-en="AI Act Ready · Enterprise Grade" data-de="AI Act konform · Enterprise-Qualität">AI Act Ready · Enterprise Grade</div>
+
+  <h1>ATHENYX<br><em>AI Advisory</em></h1>
+
+  <p data-en="AI Governance, Automation &amp; Enterprise AI Solutions — built for your business." data-de="KI-Governance, Automatisierung &amp; Enterprise-KI-Lösungen — maßgeschneidert für Ihr Unternehmen.">AI Governance, Automation &amp; Enterprise AI Solutions — built for your business.</p>
+
+  <div class="hero-cta">
+    <button class="btn-hero-primary" onclick="openModal()" data-en="Book Consultation" data-de="Beratung buchen">Book Consultation</button>
+    <button class="btn-hero-outline" onclick="smoothScrollTo('services')" data-en="Explore Services" data-de="Leistungen entdecken">Explore Services</button>
+  </div>
+
+  <div class="hero-trust">
+    <div class="trust-item">
+      <span class="trust-label" data-en="AI Act Ready" data-de="AI Act konform">AI Act Ready</span>
+      <span class="trust-sub" data-en="Compliant" data-de="Regelkonform">Compliant</span>
+    </div>
+    <div class="trust-divider"></div>
+    <div class="trust-item">
+      <span class="trust-label" data-en="Enterprise Security" data-de="Enterprise-Sicherheit">Enterprise Security</span>
+      <span class="trust-sub" data-en="Governance First" data-de="Governance zuerst">Governance First</span>
+    </div>
+    <div class="trust-divider"></div>
+    <div class="trust-item">
+      <span class="trust-label">ISO 42001</span>
+      <span class="trust-sub" data-en="Certified Approach" data-de="Zertifizierter Ansatz">Certified Approach</span>
+    </div>
+    <div class="trust-divider"></div>
+    <div class="trust-item">
+      <span class="trust-label">NIST AI RMF</span>
+      <span class="trust-sub" data-en="Framework Aligned" data-de="Framework-konform">Framework Aligned</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── TRUST STRIP ── -->
+<div class="trust-strip">
+  <div class="trust-pill"><span class="dot"></span> <span data-en="Built for AI Compliance" data-de="Konzipiert für KI-Compliance">Built for AI Compliance</span></div>
+  <div class="trust-pill"><span class="dot"></span> <span data-en="AI Act Ready" data-de="AI Act konform">AI Act Ready</span></div>
+  <div class="trust-pill"><span class="dot"></span> <span data-en="Enterprise Security &amp; Governance" data-de="Enterprise-Sicherheit &amp; Governance">Enterprise Security &amp; Governance</span></div>
+  <div class="trust-pill"><span class="dot"></span> <span data-en="Business-First Approach" data-de="Businessorientierter Ansatz">Business-First Approach</span></div>
+  <div class="trust-pill"><span class="dot"></span> <span data-en="Long-term AI Transformation Partner" data-de="Langfristiger KI-Transformationspartner">Long-term AI Transformation Partner</span></div>
+</div>
+
+<!-- ── SERVICES ── -->
+<section class="services" id="services">
+  <div class="section-label" data-en="Our Services" data-de="Unsere Leistungen">Our Services</div>
+  <h2 class="section-title" data-en="Comprehensive AI advisory for every stage of your journey." data-de="Umfassende KI-Beratung für jede Phase Ihrer Transformation.">Comprehensive AI advisory for every stage of your journey.</h2>
+  <p class="section-sub" data-en="From initial screening through to full enterprise implementation and ongoing governance." data-de="Von der ersten Standortbestimmung bis zur vollständigen Implementierung und langfristigen Governance.">From initial screening through to full enterprise implementation and ongoing governance.</p>
+
+  <div class="services-grid fade-up">
+
+    <!-- AI SCREENING & ASSESSMENT -->
+    <div class="service-card">
+      <div class="service-icon">🔍</div>
+      <h3 data-en="AI Screening &amp; Assessment" data-de="KI-Screening &amp; Bewertung">AI Screening &amp; Assessment</h3>
+      <p data-en="Structured assessment across all AI governance dimensions — identifying gaps, risks, and compliance obligations before they become problems." data-de="Strukturierte Bewertung über alle KI-Governance-Dimensionen — Lücken, Risiken und Compliance-Pflichten werden erkannt, bevor sie zum Problem werden.">Structured assessment across all AI governance dimensions — identifying gaps, risks, and compliance obligations before they become problems.</p>
+
+      <div class="dim-toggle" style="margin-top:20px;padding-top:18px;border-top:1px solid var(--gray-200);">
+        <span style="font-size:12px;font-weight:500;color:var(--gold-dark);letter-spacing:0.02em;" data-en="View 170 governance dimensions ▾" data-de="170 Governance-Dimensionen ▾">View 170 governance dimensions ▾</span>
+      </div>
+    </div>
+
+    <!-- AI GOVERNANCE & POLICY -->
+    <div class="service-card">
+      <div class="service-icon">🏛</div>
+      <h3 data-en="AI Governance &amp; Policy" data-de="KI-Governance &amp; Richtlinien">AI Governance &amp; Policy</h3>
+      <p data-en="Design and implement robust governance frameworks aligned to EU AI Act, ISO 42001, and NIST AI RMF — ready for regulatory scrutiny." data-de="Entwicklung und Implementierung belastbarer Governance-Rahmenwerke nach EU AI Act, ISO 42001 und NIST AI RMF — prüfungsbereit und regulatorisch zukunftssicher.">Design and implement robust governance frameworks aligned to EU AI Act, ISO 42001, and NIST AI RMF — ready for regulatory scrutiny.</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">⚙️</div>
+      <h3 data-en="AI Implementation &amp; Automation" data-de="KI-Implementierung &amp; Automatisierung">AI Implementation &amp; Automation</h3>
+      <p data-en="End-to-end deployment of AI systems and automation pipelines — from architecture design to production rollout with governance built-in." data-de="Vollständige Einführung von KI-Systemen und Automatisierungsprozessen — von der Architektur bis zum produktiven Betrieb, mit integrierter Governance.">End-to-end deployment of AI systems and automation pipelines — from architecture design to production rollout with governance built-in.</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">🤖</div>
+      <h3 data-en="AI Agent Development" data-de="KI-Agenten-Entwicklung">AI Agent Development</h3>
+      <p data-en="Custom AI agents for enterprise workflows — intelligent automation that operates within your governance boundaries and compliance requirements." data-de="Maßgeschneiderte KI-Agenten für Unternehmensprozesse — intelligente Automatisierung innerhalb Ihrer Governance- und Compliance-Grenzen.">Custom AI agents for enterprise workflows — intelligent automation that operates within your governance boundaries and compliance requirements.</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">🎓</div>
+      <h3 data-en="Training &amp; Certification" data-de="Schulungen &amp; Zertifizierung">Training &amp; Certification</h3>
+      <p data-en="Structured training programs from AI fundamentals to advanced governance implementation — building lasting internal capability." data-de="Strukturierte Schulungsprogramme von KI-Grundlagen bis zur fortgeschrittenen Governance-Implementierung — für nachhaltige interne Kompetenz.">Structured training programs from AI fundamentals to advanced governance implementation — building lasting internal capability.</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">💼</div>
+      <h3 data-en="Custom AI Consulting" data-de="Individuelle KI-Beratung">Custom AI Consulting</h3>
+      <p data-en="Tailored advisory engagements for complex organizational challenges — strategy, transformation roadmaps, and executive-level guidance." data-de="Maßgeschneiderte Beratung für komplexe Unternehmensherausforderungen — Strategie, Transformations-Roadmaps und Begleitung auf Führungsebene.">Tailored advisory engagements for complex organizational challenges — strategy, transformation roadmaps, and executive-level guidance.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW WE WORK ── -->
+<section class="how" id="how">
+  <div class="section-label" data-en="How We Work" data-de="Unsere Methode">How We Work</div>
+  <h2 class="section-title" style="color:var(--white)" data-en="From assessment to <em style='color:var(--gold)'>transformation</em> — five clear steps." data-de="Von der Analyse zur <em style='color:var(--gold)'>Transformation</em> — fünf klare Schritte.">From assessment to <em style="color:var(--gold)">transformation</em> — five clear steps.</h2>
+  <p class="section-sub" style="max-width:520px" data-en="A proven methodology that delivers measurable results at every stage." data-de="Eine bewährte Methodik, die in jeder Phase messbare Ergebnisse liefert.">A proven methodology that delivers measurable results at every stage.</p>
+
+  <div class="how-steps fade-up">
+    <div class="how-step">
+      <div class="step-num">1</div>
+      <span class="step-tag" data-en="Step One" data-de="Schritt 1">Step One</span>
+      <h3 data-en="Screening" data-de="Analyse">Screening</h3>
+      <p data-en="Comprehensive AI readiness assessment across governance, technical, and compliance dimensions." data-de="Umfassende KI-Standortbestimmung über Governance-, technische und Compliance-Dimensionen.">Comprehensive AI readiness assessment across governance, technical, and compliance dimensions.</p>
+    </div>
+    <div class="how-step">
+      <div class="step-num">2</div>
+      <span class="step-tag" data-en="Step Two" data-de="Schritt 2">Step Two</span>
+      <h3 data-en="Strategy" data-de="Strategie">Strategy</h3>
+      <p data-en="Develop a prioritized AI roadmap aligned to your business goals and regulatory obligations." data-de="Entwicklung einer priorisierten KI-Roadmap, abgestimmt auf Ihre Unternehmensziele und regulatorischen Pflichten.">Develop a prioritized AI roadmap aligned to your business goals and regulatory obligations.</p>
+    </div>
+    <div class="how-step">
+      <div class="step-num">3</div>
+      <span class="step-tag" data-en="Step Three" data-de="Schritt 3">Step Three</span>
+      <h3 data-en="Implementation" data-de="Implementierung">Implementation</h3>
+      <p data-en="Deploy AI systems, automation pipelines, and governance frameworks with expert oversight." data-de="Einführung von KI-Systemen, Automatisierungsprozessen und Governance-Rahmenwerken unter fachkundiger Begleitung.">Deploy AI systems, automation pipelines, and governance frameworks with expert oversight.</p>
+    </div>
+    <div class="how-step">
+      <div class="step-num">4</div>
+      <span class="step-tag" data-en="Step Four" data-de="Schritt 4">Step Four</span>
+      <h3 data-en="Governance" data-de="Governance">Governance</h3>
+      <p data-en="Establish ongoing controls, monitoring, and compliance documentation for long-term resilience." data-de="Aufbau dauerhafter Kontrollen, Monitoring und Compliance-Dokumentation für langfristige Belastbarkeit.">Establish ongoing controls, monitoring, and compliance documentation for long-term resilience.</p>
+    </div>
+    <div class="how-step">
+      <div class="step-num">5</div>
+      <span class="step-tag" data-en="Step Five" data-de="Schritt 5">Step Five</span>
+      <h3 data-en="Scaling &amp; Support" data-de="Skalierung &amp; Support">Scaling &amp; Support</h3>
+      <p data-en="Continuously optimize and scale your AI capabilities with expert guidance and support." data-de="Kontinuierliche Optimierung und Skalierung Ihrer KI-Fähigkeiten mit fachkundiger Begleitung.">Continuously optimize and scale your AI capabilities with expert guidance and support.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── INDUSTRIES ── -->
+<section class="industries" id="industries">
+  <div class="section-label" data-en="Industries &amp; Use Cases" data-de="Branchen &amp; Anwendungsfälle">Industries &amp; Use Cases</div>
+  <h2 class="section-title" data-en="Deep expertise across <em>regulated sectors.</em>" data-de="Tiefgreifende Expertise in <em>regulierten Branchen.</em>">Deep expertise across <em>regulated sectors.</em></h2>
+  <p class="section-sub" data-en="We bring sector-specific knowledge to every engagement — not generic AI advice." data-de="Wir bringen branchenspezifisches Wissen in jedes Mandat — keine generische KI-Beratung.">We bring sector-specific knowledge to every engagement — not generic AI advice.</p>
+
+  <div class="industries-grid fade-up" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="industry-card">
+      <div class="industry-icon">💊</div>
+      <div>
+        <h4 data-en="Pharma &amp; Life Sciences" data-de="Pharma &amp; Life Sciences">Pharma &amp; Life Sciences</h4>
+        <p data-en="AI governance for clinical trial automation, drug discovery, and regulatory compliance in highly regulated environments." data-de="KI-Governance für die Automatisierung klinischer Studien, Wirkstoffentwicklung und Regulierungskonformität in hochregulierten Umgebungen.">AI governance for clinical trial automation, drug discovery, and regulatory compliance in highly regulated environments.</p>
+      </div>
+    </div>
+    <div class="industry-card">
+      <div class="industry-icon">🏦</div>
+      <div>
+        <h4 data-en="Financial Services" data-de="Finanzdienstleistungen">Financial Services</h4>
+        <p data-en="Risk-first AI implementation for banking, insurance, and investment — aligned to EBA, ECB, and AI Act requirements." data-de="Risikoorientierte KI-Implementierung für Banken, Versicherungen und Investment — konform mit EBA, EZB und AI Act.">Risk-first AI implementation for banking, insurance, and investment — aligned to EBA, ECB, and AI Act requirements.</p>
+      </div>
+    </div>
+    <div class="industry-card">
+      <div class="industry-icon">👥</div>
+      <div>
+        <h4 data-en="HR" data-de="Personalwesen">HR</h4>
+        <p data-en="AI-driven talent acquisition, workforce analytics, and performance management — with full compliance for automated HR decision-making." data-de="KI-gestützte Personalgewinnung, Workforce-Analytics und Leistungsmanagement — mit vollständiger Compliance für automatisierte HR-Entscheidungen.">AI-driven talent acquisition, workforce analytics, and performance management — with full compliance for automated HR decision-making.</p>
+      </div>
+    </div>
+    <div class="industry-card">
+      <div class="industry-icon">🏭</div>
+      <div>
+        <h4 data-en="Enterprise Operations" data-de="Unternehmensoperationen">Enterprise Operations</h4>
+        <p data-en="Process automation, predictive maintenance, and intelligent supply chain — at enterprise scale with governance built-in." data-de="Prozessautomatisierung, vorausschauende Wartung und intelligente Lieferkette — in Enterprise-Qualität mit integrierter Governance.">Process automation, predictive maintenance, and intelligent supply chain — at enterprise scale with governance built-in.</p>
+      </div>
+    </div>
+    <div class="industry-card">
+      <div class="industry-icon">💬</div>
+      <div>
+        <h4 data-en="Customer Support Automation" data-de="Kundenservice-Automatisierung">Customer Support Automation</h4>
+        <p data-en="Deploy AI agents for customer-facing workflows with transparency requirements and human oversight protocols." data-de="Einsatz von KI-Agenten in kundenseitigen Prozessen mit Transparenzanforderungen und menschlichen Überwachungsprotokollen.">Deploy AI agents for customer-facing workflows with transparency requirements and human oversight protocols.</p>
+      </div>
+    </div>
+    <div class="industry-card">
+      <div class="industry-icon">⚖️</div>
+      <div>
+        <h4 data-en="Legal" data-de="Recht &amp; Compliance">Legal</h4>
+        <p data-en="AI-powered document automation, contract analysis, legal research assistance, and compliance monitoring — with full auditability and data sovereignty." data-de="KI-gestützte Dokumentenautomatisierung, Vertragsanalyse, Rechtsrecherche und Compliance-Monitoring — mit vollständiger Revisionsfähigkeit und Datensouveränität.">AI-powered document automation, contract analysis, legal research assistance, and compliance monitoring — with full auditability and data sovereignty.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── WHY ATHENYX ── -->
+<section class="why" id="why">
+  <div class="section-label" data-en="Why Athenyx" data-de="Warum Athenyx">Why Athenyx</div>
+  <h2 class="section-title" data-en="The advisory partner built <em>for AI transformation.</em>" data-de="Der Beratungspartner, der für <em>KI-Transformation</em> gemacht wurde.">The advisory partner built <em>for AI transformation.</em></h2>
+  <p class="section-sub" data-en="Not a technology vendor. Not a generic consultancy. A specialized AI advisory firm with a clear mandate." data-de="Kein Technologieanbieter. Keine Allround-Beratung. Eine spezialisierte KI-Beratungsfirma mit klarem Auftrag.">Not a technology vendor. Not a generic consultancy. A specialized AI advisory firm with a clear mandate.</p>
+
+  <div class="why-grid fade-up">
+    <div class="why-item">
+      <div class="why-num">01</div>
+      <h4 data-en="AI expertise" data-de="KI-Expertise">AI expertise</h4>
+      <p data-en="Deep knowledge of the EU AI Act, GDPR implications, ISO 42001, and NIST AI RMF — practical expertise, not translated from theoretical frameworks." data-de="Tiefgehendes Wissen zu EU AI Act, DSGVO-Implikationen, ISO 42001 und NIST AI RMF — praxisorientierte Expertise, kein theoretischer Überbau.">Deep knowledge of the EU AI Act, GDPR implications, ISO 42001, and NIST AI RMF — practical expertise, not translated from theoretical frameworks.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-num">02</div>
+      <h4 data-en="Governance + Technical implementation" data-de="Governance + technische Umsetzung">Governance + Technical implementation</h4>
+      <p data-en="We bridge the gap between legal compliance teams and engineering teams. Policy without implementation is worthless. Implementation without policy is risky." data-de="Wir schließen die Lücke zwischen Rechtsabteilung und Engineering. Richtlinien ohne Umsetzung sind wertlos. Umsetzung ohne Richtlinien ist riskant.">We bridge the gap between legal compliance teams and engineering teams. Policy without implementation is worthless. Implementation without policy is risky.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-num">03</div>
+      <h4 data-en="Secure infrastructure mindset" data-de="Sicherheitsorientierte Infrastruktur">Secure infrastructure mindset</h4>
+      <p data-en="Every engagement starts with security and data sovereignty. No AI system is deployed without a clear infrastructure governance model." data-de="Jedes Mandat beginnt mit Sicherheit und Datensouveränität. Kein KI-System wird ohne klares Infrastruktur-Governance-Modell eingeführt.">Every engagement starts with security and data sovereignty. No AI system is deployed without a clear infrastructure governance model.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-num">04</div>
+      <h4 data-en="Practical business-first approach" data-de="Praxisorientierter Business-First-Ansatz">Practical business-first approach</h4>
+      <p data-en="We prioritize business outcomes over theoretical frameworks. Compliance is necessary — but AI should also deliver measurable value." data-de="Wir priorisieren Geschäftsergebnisse über theoretische Rahmenwerke. Compliance ist notwendig — KI sollte aber auch messbaren Mehrwert schaffen.">We prioritize business outcomes over theoretical frameworks. Compliance is necessary — but AI should also deliver measurable value.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-num">05</div>
+      <h4 data-en="Long-term AI transformation partner" data-de="Langfristiger KI-Transformationspartner">Long-term AI transformation partner</h4>
+      <p data-en="Not a one-time audit. Not a report delivered and forgotten. We build long-term relationships that evolve as your AI capabilities and the regulatory landscape mature." data-de="Kein einmaliges Audit. Kein Bericht, der in der Schublade landet. Wir bauen langfristige Partnerschaften, die mit Ihren KI-Fähigkeiten und dem regulatorischen Umfeld wachsen.">Not a one-time audit. Not a report delivered and forgotten. We build long-term relationships that evolve as your AI capabilities and the regulatory landscape mature.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-num">06</div>
+      <h4 data-en="Independence you can trust" data-de="Unabhängigkeit, der Sie vertrauen können">Independence you can trust</h4>
+      <p data-en="We hold no vendor relationships, reseller agreements, or technology commissions. Our recommendations are driven entirely by what is right for your organization — nothing else." data-de="Wir unterhalten keine Anbieterbeziehungen, Wiederverkaufsverträge oder Technologieprovisionierungen. Unsere Empfehlungen richten sich ausschließlich nach dem, was für Ihre Organisation richtig ist.">We hold no vendor relationships, reseller agreements, or technology commissions. Our recommendations are driven entirely by what is right for your organization — nothing else.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── CASE STUDIES ── -->
+<section class="cases" id="cases">
+  <div class="section-label" data-en="Featured Projects" data-de="Ausgewählte Projekte">Featured Projects</div>
+  <h2 class="section-title" style="color:var(--white)" data-en="Case studies from <em style='color:var(--gold)'>real engagements.</em>" data-de="Referenzprojekte aus <em style='color:var(--gold)'>echten Mandaten.</em>">Case studies from <em style="color:var(--gold)">real engagements.</em></h2>
+  <p class="section-sub" style="max-width:520px" data-en="Selected client work illustrating the breadth and depth of our advisory practice." data-de="Ausgewählte Kundenprojekte, die Breite und Tiefe unserer Beratungspraxis veranschaulichen.">Selected client work illustrating the breadth and depth of our advisory practice.</p>
+
+  <div class="cases-grid fade-up">
+    <div class="case-card">
+      <span class="case-tag" data-en="Enterprise · Pharma" data-de="Enterprise · Pharma">Enterprise · Pharma</span>
+      <h3 data-en="AI Readiness Screening" data-de="KI-Reifegrad-Analyse">AI Readiness Screening</h3>
+      <p data-en="Full 170-dimension governance assessment for a pharmaceutical company preparing for AI Act compliance. Delivered a prioritized remediation roadmap and board-level risk report." data-de="Vollständige 170-Dimensionen-Governance-Bewertung für ein Pharmaunternehmen, das sich auf AI Act Compliance vorbereitet. Ergebnis: priorisierte Sanierungsroadmap und Risikoberichterstattung auf Vorstandsebene.">Full 170-dimension governance assessment for a pharmaceutical company preparing for AI Act compliance. Delivered a prioritized remediation roadmap and board-level risk report.</p>
+      <span class="case-result" data-en="↑ 67% compliance gap closed in 6 months" data-de="↑ 67 % Compliance-Lücke in 6 Monaten geschlossen">↑ 67% compliance gap closed in 6 months</span>
+    </div>
+    <div class="case-card">
+      <span class="case-tag" data-en="Enterprise · Financial Services" data-de="Enterprise · Finanzdienstleistungen">Enterprise · Financial Services</span>
+      <h3 data-en="AI-Augmented Workflow Integration" data-de="KI-gestützte Workflow-Integration">AI-Augmented Workflow Integration</h3>
+      <p data-en="Designed and deployed an AI-augmented workflow for a mid-size financial services firm — improving client qualification speed while maintaining full audit trail compliance." data-de="Konzeption und Implementierung eines KI-gestützten Workflows für ein mittelständisches Finanzdienstleistungsunternehmen — Qualifizierung beschleunigt, vollständige Revisionsspur gewährleistet.">Designed and deployed an AI-augmented workflow for a mid-size financial services firm — improving client qualification speed while maintaining full audit trail compliance.</p>
+      <span class="case-result" data-en="↓ 40% reduction in manual qualification time" data-de="↓ 40 % weniger manuelle Qualifizierungszeit">↓ 40% reduction in manual qualification time</span>
+    </div>
+    <div class="case-card">
+      <span class="case-tag" data-en="Enterprise · Healthcare" data-de="Enterprise · Gesundheitswesen">Enterprise · Healthcare</span>
+      <h3 data-en="Internal AI Governance Framework" data-de="Internes KI-Governance-Rahmenwerk">Internal AI Governance Framework</h3>
+      <p data-en="Built a complete internal AI governance structure for a healthcare group — including AI ethics committee charter, risk classification procedures, and staff training curriculum." data-de="Aufbau einer vollständigen internen KI-Governance-Struktur für eine Klinikgruppe — inkl. KI-Ethikausschuss-Satzung, Risikoklassifizierung und Schulungscurriculum.">Built a complete internal AI governance structure for a healthcare group — including AI ethics committee charter, risk classification procedures, and staff training curriculum.</p>
+      <span class="case-result" data-en="✓ Audit-ready within 90 days" data-de="✓ Prüfungsbereit innerhalb von 90 Tagen">✓ Audit-ready within 90 days</span>
+    </div>
+    <div class="case-card">
+      <span class="case-tag" data-en="Scale-up · Operations" data-de="Scale-up · Betrieb">Scale-up · Operations</span>
+      <h3 data-en="AI Agent Automation" data-de="KI-Agenten-Automatisierung">AI Agent Automation</h3>
+      <p data-en="Deployed a multi-agent automation system handling document processing, compliance checks, and internal escalation routing — reducing manual overhead across 3 departments." data-de="Implementierung eines Multi-Agenten-Automatisierungssystems für Dokumentenverarbeitung, Compliance-Prüfungen und interne Eskalationssteuerung — Entlastung in 3 Abteilungen.">Deployed a multi-agent automation system handling document processing, compliance checks, and internal escalation routing — reducing manual overhead across 3 departments.</p>
+      <span class="case-result" data-en="↓ 60% manual processing reduced" data-de="↓ 60 % weniger manuelle Verarbeitung">↓ 60% manual processing reduced</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── TRAINING ── -->
+<section class="training" id="training">
+  <div class="section-label" data-en="Training &amp; Certification" data-de="Schulungen &amp; Zertifizierung">Training &amp; Certification</div>
+  <h2 class="section-title" data-en="Build AI competence <em>across your organization.</em>" data-de="KI-Kompetenz <em>im gesamten Unternehmen aufbauen.</em>">Build AI competence <em>across your organization.</em></h2>
+  <p class="section-sub" data-en="Structured programs for every level — from executive awareness to technical implementation mastery." data-de="Strukturierte Programme für jede Ebene — von der Führungskräfte-Sensibilisierung bis zur technischen Implementierungsreife.">Structured programs for every level — from executive awareness to technical implementation mastery.</p>
+
+  <div class="training-grid fade-up">
+    <div class="training-card">
+      <span class="training-level" data-en="Foundation" data-de="Grundlagen">Foundation</span>
+      <h3 data-en="AI Fundamentals" data-de="KI-Grundlagen">AI Fundamentals</h3>
+      <p data-en="An accessible introduction to AI concepts, capabilities, and limitations for business leaders, managers, and non-technical professionals." data-de="Eine verständliche Einführung in KI-Konzepte, Fähigkeiten und Grenzen für Führungskräfte, Manager und nicht-technische Fachleute.">An accessible introduction to AI concepts, capabilities, and limitations for business leaders, managers, and non-technical professionals.</p>
+    </div>
+    <div class="training-card">
+      <span class="training-level" data-en="Practitioner" data-de="Praktiker">Practitioner</span>
+      <h3 data-en="AI Governance Training" data-de="KI-Governance-Schulung">AI Governance Training</h3>
+      <p data-en="A comprehensive program covering AI Act obligations, governance framework design, risk management, and audit preparation for compliance professionals." data-de="Ein umfassendes Programm zu AI Act-Pflichten, Governance-Rahmenwerk-Design, Risikomanagement und Auditsvorbereitung für Compliance-Fachleute.">A comprehensive program covering AI Act obligations, governance framework design, risk management, and audit preparation for compliance professionals.</p>
+    </div>
+    <div class="training-card" style="grid-column: 1 / -1;">
+      <span class="training-level" data-en="Zero to Hero" data-de="Vom Einsteiger zum Experten">Zero to Hero</span>
+      <h3 data-en="In-House AI Champions" data-de="Interne KI-Champions">In-House AI Champions</h3>
+      <p data-en="Empower your own staff to identify opportunities, prototype solutions, and deliver proof-of-concept AI projects independently. Designed for teams ready to channel the flood of new ideas from colleagues into real, working pilots — without outside dependency." data-de="Befähigen Sie Ihre eigenen Mitarbeitenden, Potenziale zu erkennen, Lösungen zu prototypisieren und eigenständig Proof-of-Concept-KI-Projekte zu liefern. Konzipiert für Teams, die den Ideenfluss im Unternehmen in echte, funktionierende Pilotprojekte überführen wollen — ohne externe Abhängigkeit.">Empower your own staff to identify opportunities, prototype solutions, and deliver proof-of-concept AI projects independently. Designed for teams ready to channel the flood of new ideas from colleagues into real, working pilots — without outside dependency.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT ── -->
+<section class="about" id="about">
+  <div class="section-label" data-en="About Athenyx" data-de="Über Athenyx">About Athenyx</div>
+  <h2 class="section-title" data-en="We exist to make AI <em>work responsibly.</em>" data-de="Wir machen KI <em>verantwortungsvoll nutzbar.</em>">We exist to make AI <em>work responsibly.</em></h2>
+
+  <div class="about-layout fade-up">
+    <div>
+      <div class="about-text">
+        <h3 data-en="Our Mission" data-de="Unsere Mission">Our Mission</h3>
+        <p data-en="Athenyx was founded on a simple belief: that AI should be transformative, not reckless. Organizations deserve an advisory partner that understands both the technology and the regulatory environment they operate in." data-de="Athenyx wurde auf einer einfachen Überzeugung gegründet: KI soll transformativ sein, nicht leichtfertig. Unternehmen verdienen einen Beratungspartner, der sowohl die Technologie als auch das regulatorische Umfeld versteht.">Athenyx was founded on a simple belief: that AI should be transformative, not reckless. Organizations deserve an advisory partner that understands both the technology and the regulatory environment they operate in.</p>
+        <p data-en="We combine deep technical expertise with practical governance knowledge — helping companies implement AI that actually works, complies with evolving regulation, and creates lasting value." data-de="Wir verbinden tiefgehende technische Expertise mit praxisorientiertem Governance-Wissen — und helfen Unternehmen, KI zu implementieren, die wirklich funktioniert, regulatorische Anforderungen erfüllt und dauerhaften Mehrwert schafft.">We combine deep technical expertise with practical governance knowledge — helping companies implement AI that actually works, complies with evolving regulation, and creates lasting value.</p>
+        <div class="about-mission">
+          <p data-en="&ldquo;Making your company AI-ready — not just compliant, but genuinely capable of sustained AI-driven growth.&rdquo;" data-de="&ldquo;Ihr Unternehmen KI-bereit machen — nicht nur compliant, sondern wirklich befähigt zu nachhaltigem, KI-getriebenem Wachstum.&rdquo;">"Making your company AI-ready — not just compliant, but genuinely capable of sustained AI-driven growth."</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <p style="font-size:12px;color:var(--gray-400);margin-bottom:24px;letter-spacing:.08em;text-transform:uppercase;font-weight:500" data-en="Core Competencies" data-de="Kernkompetenzen">Core Competencies</p>
+
+      <div class="dept-grid">
+        <div class="dept-card">
+          <div class="dept-header">
+            <span class="dept-icon">⚖️</span>
+            <span class="dept-name" data-en="Legal Experts" data-de="Rechtsexperten">Legal Experts</span>
+          </div>
+          <div class="dept-people">
+            <div class="person-dot">LE</div>
+            <div class="person-dot">LE</div>
+            <div class="person-dot">LE</div>
+            <div class="person-dot gold">+</div>
+          </div>
+        </div>
+        <div class="dept-card">
+          <div class="dept-header">
+            <span class="dept-icon">💊</span>
+            <span class="dept-name" data-en="Pharma Excellence" data-de="Pharma-Expertise">Pharma Excellence</span>
+          </div>
+          <div class="dept-people">
+            <div class="person-dot">PE</div>
+            <div class="person-dot">PE</div>
+            <div class="person-dot">PE</div>
+            <div class="person-dot">PE</div>
+            <div class="person-dot gold">+</div>
+          </div>
+        </div>
+        <div class="dept-card">
+          <div class="dept-header">
+            <span class="dept-icon">⚙️</span>
+            <span class="dept-name" data-en="Technical Masters" data-de="Technische Experten">Technical Masters</span>
+          </div>
+          <div class="dept-people">
+            <div class="person-dot">TM</div>
+            <div class="person-dot">TM</div>
+            <div class="person-dot">TM</div>
+            <div class="person-dot">TM</div>
+            <div class="person-dot">TM</div>
+          </div>
+        </div>
+        <div class="dept-card">
+          <div class="dept-header">
+            <span class="dept-icon">📊</span>
+            <span class="dept-name" data-en="Management Specialists" data-de="Management-Spezialisten">Management Specialists</span>
+          </div>
+          <div class="dept-people">
+            <div class="person-dot">MS</div>
+            <div class="person-dot">MS</div>
+            <div class="person-dot">MS</div>
+            <div class="person-dot gold">+</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;padding:28px;border:1px solid var(--gray-200);border-radius:12px;background:var(--navy);">
+        <p style="font-size:12px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-weight:500;margin-bottom:16px" data-en="Our Philosophy" data-de="Unsere Philosophie">Our Philosophy</p>
+        <p style="font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--white);line-height:1.65;font-style:italic;margin-bottom:16px" data-en="&ldquo;We arrive as the colleague who knows your organisation inside out, and the sharp-eyed intern who spots what everyone else missed. We deliver with the speed of your best engineer and think with the ambition of a new CEO who actually knows how to execute.&rdquo;" data-de="&ldquo;Wir kommen als der Kollege, der Ihre Organisation in- und auswendig kennt, und als der aufmerksame Newcomer, der sieht, was alle anderen übersehen haben. Wir liefern mit der Geschwindigkeit Ihres besten Ingenieurs und denken mit dem Ehrgeiz eines neuen CEOs, der weiß, wie man umsetzt.&rdquo;">"We arrive as the colleague who knows your organisation inside out, and the sharp-eyed intern who spots what everyone else missed. We deliver with the speed of your best engineer and think with the ambition of a new CEO who actually knows how to execute."</p>
+        <p style="font-size:13px;color:rgba(248,248,252,0.55);line-height:1.7" data-en="We measure, help, adjust, align, train and establish — together with you. When we leave, you are independent, capable, and ahead of the field." data-de="Wir messen, helfen, passen an, richten aus, schulen und etablieren — gemeinsam mit Ihnen. Wenn wir gehen, sind Sie unabhängig, leistungsfähig und der Konkurrenz voraus.">We measure, help, adjust, align, train and establish — together with you. When we leave, you are independent, capable, and ahead of the field.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACT ── -->
+<section class="contact-section" id="contact">
+  <div class="section-label" data-en="Contact" data-de="Kontakt">Contact</div>
+  <h2 class="section-title" data-en="Ready to make your company <em>AI-ready?</em>" data-de="Bereit, Ihr Unternehmen <em>KI-bereit</em> zu machen?">Ready to make your company <em>AI-ready?</em></h2>
+
+  <div class="contact-layout fade-up">
+    <div class="contact-info">
+      <h3 data-en="Let's start with a conversation." data-de="Lassen Sie uns ins Gespräch kommen.">Let's start with a conversation.</h3>
+      <p data-en="Whether you have a specific project in mind or just want to understand where your organization stands — we are happy to talk. No obligation, no sales pitch." data-de="Ob Sie ein konkretes Projekt im Blick haben oder einfach nur verstehen möchten, wo Ihr Unternehmen steht — wir sprechen gerne mit Ihnen. Unverbindlich, ohne Verkaufsgespräch.">Whether you have a specific project in mind or just want to understand where your organization stands — we are happy to talk. No obligation, no sales pitch.</p>
+    </div>
+
+    <div class="contact-form-inline">
+      <div class="form-row">
+        <div class="form-group">
+          <label data-en="First Name" data-de="Vorname">First Name</label>
+          <input type="text" placeholder="Anna">
+        </div>
+        <div class="form-group">
+          <label data-en="Last Name" data-de="Nachname">Last Name</label>
+          <input type="text" placeholder="Müller">
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-en="Company Email" data-de="Geschäftliche E-Mail">Company Email</label>
+        <input type="email" placeholder="anna@company.com">
+      </div>
+      <div class="form-group">
+        <label data-en="Organization" data-de="Unternehmen">Organization</label>
+        <input type="text" placeholder="Company GmbH">
+      </div>
+      <div class="form-group">
+        <label data-en="How can we help?" data-de="Wie können wir helfen?">How can we help?</label>
+        <select>
+          <option value="" data-en="Select a service..." data-de="Leistung auswählen...">Select a service...</option>
+          <option data-en="AI Screening &amp; Assessment" data-de="KI-Screening &amp; Bewertung">AI Screening &amp; Assessment</option>
+          <option data-en="AI Governance &amp; Policy" data-de="KI-Governance &amp; Richtlinien">AI Governance &amp; Policy</option>
+          <option data-en="AI Implementation &amp; Automation" data-de="KI-Implementierung &amp; Automatisierung">AI Implementation &amp; Automation</option>
+          <option data-en="AI Agent Development" data-de="KI-Agenten-Entwicklung">AI Agent Development</option>
+          <option data-en="Training &amp; Certification" data-de="Schulungen &amp; Zertifizierung">Training &amp; Certification</option>
+          <option data-en="Custom AI Consulting" data-de="Individuelle KI-Beratung">Custom AI Consulting</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label data-en="Message (optional)" data-de="Nachricht (optional)">Message (optional)</label>
+        <textarea rows="3" placeholder="Tell us a bit about your situation..." data-en-placeholder="Tell us a bit about your situation..." data-de-placeholder="Beschreiben Sie kurz Ihre Situation..."></textarea>
+      </div>
+      <button class="btn-submit" onclick="handleContactSubmit(this)" data-en="Send Message →" data-de="Nachricht senden →">Send Message →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA STRIP ── -->
+<section class="cta-strip">
+  <h2 data-en="Ready to make your company<br><em>AI-ready?</em>" data-de="Bereit, Ihr Unternehmen<br><em>KI-bereit</em> zu machen?">Ready to make your company<br><em>AI-ready?</em></h2>
+  <p data-en="Start with a consultation — no commitment required." data-de="Starten Sie mit einem Beratungsgespräch — unverbindlich und kostenlos.">Start with a consultation — no commitment required.</p>
+  <div class="cta-strip-btns">
+    <button class="btn-hero-primary" onclick="openModal()" data-en="Book Consultation" data-de="Beratung buchen">Book Consultation</button>
+    <button class="btn-hero-outline" onclick="smoothScrollTo('services')" data-en="Explore Services" data-de="Leistungen entdecken">Explore Services</button>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <a href="#" class="footer-logo" onclick="smoothScrollTo('hero'); return false;">Athenyx<span>.</span></a>
+  <div class="footer-links">
+    <a onclick="smoothScrollTo('services')" data-en="Services" data-de="Leistungen">Services</a>
+    <a onclick="smoothScrollTo('training')" data-en="Training" data-de="Schulungen">Training</a>
+    <a onclick="smoothScrollTo('cases')" data-en="Case Studies" data-de="Referenzprojekte">Case Studies</a>
+    <a onclick="smoothScrollTo('about')" data-en="About" data-de="Über uns">About</a>
+    <a href="#" data-en="Privacy Policy" data-de="Datenschutz">Privacy Policy</a>
+    <a href="#" data-en="Legal Notice / Impressum" data-de="Impressum">Legal Notice / Impressum</a>
+    <a href="#" data-en="Terms" data-de="AGB">Terms</a>
+  </div>
+  <span class="footer-copy" data-en="© 2025 Athenyx AI Advisory. All rights reserved." data-de="© 2025 Athenyx AI Advisory. Alle Rechte vorbehalten.">© 2025 Athenyx AI Advisory. All rights reserved.</span>
+</footer>
+
+<!-- ── CONSULTATION MODAL ── -->
+<div class="modal-overlay" id="consultModal" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 data-en="Book a Consultation" data-de="Beratung buchen">Book a Consultation</h3>
+    <p class="modal-sub" data-en="Tell us about your organization and we'll be in touch within one business day." data-de="Beschreiben Sie Ihr Unternehmen — wir melden uns innerhalb eines Werktages.">Tell us about your organization and we'll be in touch within one business day.</p>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label data-en="First Name" data-de="Vorname">First Name</label>
+        <input type="text" id="m-fname" placeholder="Anna">
+      </div>
+      <div class="form-group">
+        <label data-en="Last Name" data-de="Nachname">Last Name</label>
+        <input type="text" id="m-lname" placeholder="Müller">
+      </div>
+    </div>
+    <div class="form-group">
+      <label data-en="Work Email" data-de="Geschäftliche E-Mail">Work Email</label>
+      <input type="email" id="m-email" placeholder="anna@company.com">
+    </div>
+    <div class="form-group">
+      <label data-en="Company" data-de="Unternehmen">Company</label>
+      <input type="text" id="m-company" placeholder="Company GmbH">
+    </div>
+    <div class="form-group">
+      <label data-en="Primary Interest" data-de="Ihr Hauptanliegen">Primary Interest</label>
+      <select id="m-interest">
+        <option value="" data-en="Select a topic..." data-de="Thema auswählen...">Select a topic...</option>
+        <option data-en="AI Screening &amp; Assessment" data-de="KI-Screening &amp; Bewertung">AI Screening &amp; Assessment</option>
+        <option data-en="AI Governance &amp; Policy" data-de="KI-Governance &amp; Richtlinien">AI Governance &amp; Policy</option>
+        <option data-en="AI Implementation &amp; Automation" data-de="KI-Implementierung &amp; Automatisierung">AI Implementation &amp; Automation</option>
+        <option data-en="AI Agent Development" data-de="KI-Agenten-Entwicklung">AI Agent Development</option>
+        <option data-en="Training &amp; Certification" data-de="Schulungen &amp; Zertifizierung">Training &amp; Certification</option>
+        <option data-en="Custom AI Consulting" data-de="Individuelle KI-Beratung">Custom AI Consulting</option>
+        <option data-en="General Enquiry" data-de="Allgemeine Anfrage">General Enquiry</option>
+      </select>
+    </div>
+    <button class="btn-submit" onclick="handleModalSubmit(this)" data-en="Request Consultation →" data-de="Beratung anfragen →">Request Consultation →</button>
+    <div class="modal-contact-alt">
+      <span data-en="Or email us directly at" data-de="Oder schreiben Sie uns direkt an">Or email us directly at</span> <a href="mailto:customer@athenyx-ai.de">customer@athenyx-ai.de</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── LANGUAGE SYSTEM ── */
+  let currentLang = 'en';
+
+  function initLangToggle() {
+    const toggle = document.getElementById('lang-toggle');
+    const slider = document.getElementById('lang-slider');
+    const enBtn = document.getElementById('lang-en');
+    const deBtn = document.getElementById('lang-de');
+    if (!slider || !enBtn || !deBtn) return;
+    // Set slider width based on EN button
+    const enW = enBtn.offsetWidth;
+    const deW = deBtn.offsetWidth;
+    slider.style.width = enW + 'px';
+    toggle._enW = enW;
+    toggle._deW = deW;
+  }
+
+  function toggleLang() {
+    currentLang = currentLang === 'en' ? 'de' : 'en';
+    applyLanguage(currentLang);
+    updateToggleUI();
+  }
+
+  function updateToggleUI() {
+    const slider = document.getElementById('lang-slider');
+    const enBtn = document.getElementById('lang-en');
+    const deBtn = document.getElementById('lang-de');
+    if (!slider) return;
+    if (currentLang === 'de') {
+      const offset = enBtn.offsetWidth;
+      slider.style.transform = 'translateX(' + offset + 'px)';
+      slider.style.width = deBtn.offsetWidth + 'px';
+      enBtn.classList.remove('active');
+      deBtn.classList.add('active');
+    } else {
+      slider.style.transform = 'translateX(0)';
+      slider.style.width = enBtn.offsetWidth + 'px';
+      enBtn.classList.add('active');
+      deBtn.classList.remove('active');
+    }
+  }
+
+  function applyLanguage(lang) {
+    // Update elements with data-en / data-de attributes
+    document.querySelectorAll('[data-en]').forEach(el => {
+      const val = el.getAttribute('data-' + lang);
+      if (!val) return;
+      // For elements whose text is HTML (contains tags), use innerHTML
+      if (val.includes('<') || val.includes('&')) {
+        el.innerHTML = val;
+      } else {
+        el.textContent = val;
+      }
+    });
+    // Handle textarea placeholders separately
+    document.querySelectorAll('textarea[data-' + lang + '-placeholder]').forEach(el => {
+      el.placeholder = el.getAttribute('data-' + lang + '-placeholder');
+    });
+    document.documentElement.lang = lang;
+  }
+
+  window.addEventListener('load', () => {
+    initLangToggle();
+  });
+
+  /* ── SMOOTH SCROLL ── */
+  function smoothScrollTo(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const navH = 72;
+    const targetY = el.getBoundingClientRect().top + window.scrollY - navH;
+    const startY = window.scrollY;
+    const diff = targetY - startY;
+    const duration = 700;
+    let start = null;
+    function ease(t) {
+      return t < 0.5 ? 16*t*t*t*t*t : 1 - Math.pow(-2*t+2, 5)/2;
+    }
+    function step(ts) {
+      if (!start) start = ts;
+      const elapsed = ts - start;
+      const progress = Math.min(elapsed / duration, 1);
+      window.scrollTo(0, startY + diff * ease(progress));
+      if (elapsed < duration) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* Native hash links fallback */
+  document.addEventListener('click', function(e) {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute('href').slice(1);
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (el) { e.preventDefault(); smoothScrollTo(id); }
+  });
+
+  /* ── NAV SCROLL ── */
+  const nav = document.getElementById('main-nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 20);
+  }, { passive: true });
+
+  /* ── MOBILE MENU ── */
+  function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const btn = document.getElementById('nav-hamburger');
+    menu.classList.toggle('open');
+    btn.classList.toggle('open');
+  }
+  function closeMobileMenu() {
+    document.getElementById('mobile-menu').classList.remove('open');
+    document.getElementById('nav-hamburger').classList.remove('open');
+  }
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobile-menu');
+    const btn = document.getElementById('nav-hamburger');
+    if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+      closeMobileMenu();
+    }
+  });
+
+  /* ── MODAL ── */
+  function openModal() {
+    document.getElementById('consultModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('consultModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function handleOverlayClick(e) {
+    if (e.target === e.currentTarget) closeModal();
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  /* ── FORM SUBMIT (demo) ── */
+  function handleModalSubmit(btn) {
+    const email = document.getElementById('m-email').value;
+    if (!email) { alert(currentLang === 'de' ? 'Bitte geben Sie Ihre E-Mail-Adresse ein.' : 'Please enter your email address.'); return; }
+    btn.textContent = currentLang === 'de' ? '✓ Anfrage erhalten' : '✓ Request Received';
+    btn.style.background = '#1D6B4F';
+    setTimeout(closeModal, 1800);
+  }
+  function handleContactSubmit(btn) {
+    btn.textContent = currentLang === 'de' ? '✓ Nachricht gesendet' : '✓ Message Sent';
+    btn.style.background = '#1D6B4F';
+  }
+
+  /* ── SCROLL ANIMATIONS ── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.06 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
