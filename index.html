@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Intelligence Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#0D1B2A;--navy2:#1A3A5C;--blue:#1A73E8;--blue-light:#E8F0FE;
+  --green:#1E8449;--green-light:#D5F5E3;--red:#C0392B;--red-light:#FADBD8;
+  --amber:#D4AC0D;--amber-light:#FEF9E7;--purple:#7D3C98;--purple-light:#F4ECF7;
+  --teal:#117A65;--teal-light:#D1F2EB;
+  --bg:#F0F2F5;--surface:#FFFFFF;--surface2:#F8F9FB;
+  --text:#0D1B2A;--text2:#5F6368;--border:#E2E6EA;
+  --shadow:0 2px 8px rgba(0,0,0,0.08);--shadow-lg:0 8px 32px rgba(0,0,0,0.12);
+  --radius:12px;
+}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ── HEADER ── */
+.header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;padding:0 16px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.25)}
+.header-left{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0}
+.header-title{font-size:15px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-sub{font-size:11px;opacity:.6;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.live-badge{background:rgba(30,132,73,0.3);border:1px solid rgba(30,132,73,0.5);color:#81F4A2;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#81F4A2;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── LANGUAGE SWITCHER ── */
+.lang-switcher{display:flex;align-items:center;background:rgba(255,255,255,0.1);border-radius:20px;padding:2px;gap:1px}
+.lang-btn{background:transparent;border:none;color:rgba(255,255,255,.55);font-size:10px;font-weight:700;padding:3px 9px;border-radius:18px;cursor:pointer;transition:.2s;letter-spacing:.04em}
+.lang-btn:hover{color:#fff;background:rgba(255,255,255,.12)}
+.lang-btn.active{background:var(--blue);color:#fff}
+
+/* ── MOBILE NAV TOGGLE ── */
+.mob-nav-btn{display:none;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:6px 9px;cursor:pointer;font-size:18px;line-height:1}
+
+/* ── LAYOUT ── */
+.layout{display:flex;min-height:calc(100vh - 60px)}
+.sidebar{width:200px;background:var(--navy);flex-shrink:0;padding:16px 0;display:flex;flex-direction:column;gap:2px;transition:.25s}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:rgba(255,255,255,.55);cursor:pointer;font-size:13px;font-weight:500;transition:.2s;border-left:3px solid transparent}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05)}
+.nav-item.active{color:#fff;background:rgba(26,115,232,.2);border-left-color:var(--blue)}
+.nav-icon{font-size:16px;width:18px;text-align:center;flex-shrink:0}
+.nav-section{padding:12px 20px 4px;font-size:9px;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em}
+.main{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;min-width:0}
+
+/* ── PAGES ── */
+.page{display:none}.page.active{display:contents}
+
+/* ── BRIEFING CARD ── */
+.briefing-card{background:var(--navy);border-radius:var(--radius);padding:20px 24px;color:#fff;border-left:4px solid var(--blue);box-shadow:var(--shadow-lg)}
+.briefing-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:6px}
+.briefing-title{font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em}
+.briefing-date{font-size:11px;color:rgba(255,255,255,.35)}
+.briefing-items{display:flex;flex-direction:column;gap:8px}
+.briefing-item{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-radius:8px}
+.briefing-item.ok{background:rgba(30,132,73,.15);border:1px solid rgba(30,132,73,.25)}
+.briefing-item.warn{background:rgba(212,172,13,.12);border:1px solid rgba(212,172,13,.25)}
+.briefing-item.alert{background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.25)}
+.briefing-icon{font-size:14px;margin-top:1px;flex-shrink:0}
+.briefing-text{font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.88)}
+.briefing-text strong{color:#fff}
+.briefing-footer{margin-top:12px;font-size:10px;color:rgba(255,255,255,.25);display:flex;align-items:center;gap:6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.kpi-card{background:var(--surface);border-radius:var(--radius);padding:16px 18px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.kpi-label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.kpi-value{font-size:22px;font-weight:800;letter-spacing:-0.03em;line-height:1}
+.kpi-value.g{color:var(--green)}.kpi-value.r{color:var(--red)}.kpi-value.b{color:var(--blue)}.kpi-value.n{color:var(--text)}
+.kpi-trend{font-size:11px;margin-top:5px;font-weight:600}
+.kpi-trend.up{color:var(--green)}.kpi-trend.down{color:var(--red)}.kpi-trend.neu{color:var(--text2)}
+
+/* ── CHARTS ── */
+.chart-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.chart-card{background:var(--surface);border-radius:var(--radius);padding:18px 20px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.card-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px}
+/* FIX: every chart wrapper gets a fixed height so the canvas never grows */
+.chart-wrap{position:relative;height:160px}
+.chart-wrap.h110{height:110px}
+.chart-wrap.h120{height:120px}
+.chart-wrap.h140{height:140px}
+.chart-wrap.h180{height:180px}
+.chart-wrap.h220{height:220px}
+canvas{display:block;max-width:100%}
+
+/* ── SCORECARD ── */
+.scorecard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.scorecard-item{background:var(--surface);border-radius:var(--radius);padding:18px;border:1px solid var(--border);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center}
+.gauge-wrap{position:relative;width:90px;height:90px;margin-bottom:10px}
+.gauge-svg{width:90px;height:90px}
+.gauge-score{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.gauge-num{font-size:20px;font-weight:800;letter-spacing:-0.03em}
+.gauge-lbl{font-size:8px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.sc-name{font-size:12px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px}
+.sc-country{font-size:10px;color:var(--text2);margin-bottom:10px}
+.sc-pills{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.sc-pill{font-size:9px;font-weight:700;padding:3px 7px;border-radius:20px;cursor:default;position:relative}
+.sc-pill:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:9px;padding:4px 8px;border-radius:6px;white-space:nowrap;z-index:50;font-weight:400}
+.sc-pill.g{background:var(--green-light);color:var(--green)}
+.sc-pill.a{background:var(--amber-light);color:#7D6608}
+.sc-pill.r{background:var(--red-light);color:var(--red)}
+.sc-rank{font-size:9px;color:var(--text2);margin-top:8px;font-weight:600}
+
+/* ── ANOMALY ── */
+.two-col{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+.heatmap-wrap{margin-bottom:12px}
+.heatmap-title{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.hm-cell{height:18px;border-radius:3px;cursor:default;position:relative}
+.hm-cell:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100%+4px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:9px;padding:3px 7px;border-radius:5px;white-space:nowrap;z-index:50}
+.alert-feed{display:flex;flex-direction:column;gap:8px;max-height:440px;overflow-y:auto;padding-right:2px}
+.alert-feed::-webkit-scrollbar{width:4px}.alert-feed::-webkit-scrollbar-track{background:var(--surface2)}.alert-feed::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.alert-card{background:var(--surface);border-radius:10px;padding:12px 14px;border:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;box-shadow:var(--shadow)}
+.alert-card.high{border-left:3px solid var(--red)}
+.alert-card.med{border-left:3px solid var(--amber)}
+.alert-card.low{border-left:3px solid var(--blue)}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.alert-dot.high{background:var(--red)}.alert-dot.med{background:var(--amber)}.alert-dot.low{background:var(--blue)}
+.alert-body{flex:1;min-width:0}
+.alert-desc{font-size:12px;font-weight:600;color:var(--text);line-height:1.4}
+.alert-meta{font-size:10px;color:var(--text2);margin-top:2px}
+.alert-actions{display:flex;gap:4px;margin-top:6px}
+.btn-sm{font-size:10px;padding:3px 9px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-weight:600;transition:.15s}
+.btn-sm:hover{background:var(--border)}
+.btn-sm.investigate{background:var(--red-light);border-color:var(--red);color:var(--red)}
+.btn-sm.investigate:hover{background:var(--red);color:#fff}
+
+/* ── TRUST VERIFICATION ── */
+.trust-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.verified-stamp{font-size:10px;font-weight:700;color:var(--green);background:var(--green-light);padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:4px}
+.trust-table-wrap{overflow-x:auto}
+.trust-table{width:100%;border-collapse:collapse;min-width:600px}
+.trust-table th{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;padding:8px 12px;text-align:left;border-bottom:2px solid var(--border);background:var(--surface2)}
+.trust-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:middle}
+.trust-table tr:last-child td{border-bottom:none}
+.trust-table .num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.match-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
+.match-badge.ok{background:var(--green-light);color:var(--green)}
+.match-badge.warn{background:var(--amber-light);color:#7D6608}
+.match-badge.flag{background:var(--red-light);color:var(--red)}
+.discrepancy{font-size:10px;color:var(--red);font-weight:600}
+
+/* ── DUPLICATES ── */
+.dup-summary{display:flex;align-items:center;gap:16px;background:var(--red-light);border:1px solid rgba(192,57,43,.25);border-radius:10px;padding:12px 16px;margin-bottom:14px;flex-wrap:wrap}
+.dup-sum-num{font-size:22px;font-weight:800;color:var(--red)}
+.dup-sum-text{font-size:12px;color:var(--red);font-weight:600;line-height:1.4}
+.dup-pair{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.dup-pair-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:4px}
+.dup-vendor{font-size:13px;font-weight:700;color:var(--text)}
+.confidence{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--amber-light);color:#7D6608}
+.confidence.high{background:var(--red-light);color:var(--red)}
+.dup-rows{display:flex;flex-direction:column;gap:6px}
+.dup-row{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between}
+.dup-row-left{font-size:11px;color:var(--text2)}
+.dup-row-left strong{color:var(--text);font-size:12px;display:block}
+.dup-amount{font-size:13px;font-weight:800;color:var(--red)}
+.dup-bracket{text-align:center;font-size:10px;color:var(--amber);font-weight:700;margin:2px 0}
+.dup-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn-legit{font-size:11px;padding:5px 14px;border-radius:7px;border:1px solid var(--green);background:var(--green-light);color:var(--green);cursor:pointer;font-weight:700;transition:.15s}
+.btn-legit:hover{background:var(--green);color:#fff}
+.btn-flag{font-size:11px;padding:5px 14px;border-radius:7px;border:1px solid var(--red);background:var(--red-light);color:var(--red);cursor:pointer;font-weight:700;transition:.15s}
+.btn-flag:hover{background:var(--red);color:#fff}
+
+/* ── SECTION ROW UTILITY ── */
+.section-row{display:grid;gap:16px}
+.section-row.c2{grid-template-columns:1fr 1fr}
+.section-row.c3{grid-template-columns:1fr 1fr 1fr}
+
+/* ── OVERVIEW EXTRAS ── */
+.account-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.account-tile{background:var(--surface);border-radius:var(--radius);padding:14px 16px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.account-tile.low{border-left:3px solid var(--amber)}
+.account-tile.critical{border-left:3px solid var(--red)}
+.acc-name{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.acc-country{display:inline-block;font-size:9px;padding:1px 6px;border-radius:4px;font-weight:700;margin-bottom:6px}
+.acc-country.slo{background:#E3F0FF;color:var(--blue)}
+.acc-country.bih{background:#FEF9E7;color:#7D6608}
+.acc-amount{font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--text)}
+.acc-amount.neg{color:var(--red)}
+.acc-warning{font-size:9px;color:var(--amber);font-weight:700;margin-top:4px}
+.acc-critical{font-size:9px;color:var(--red);font-weight:700;margin-top:4px}
+.total-cash-bar{background:var(--navy);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;color:#fff;flex-wrap:wrap;gap:10px}
+.tcb-label{font-size:11px;opacity:.6;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.tcb-value{font-size:24px;font-weight:800;letter-spacing:-0.03em}
+.tcb-sub{font-size:11px;opacity:.5;margin-top:2px}
+
+/* ── SUMMARY TABLE ── */
+.summary-table-wrap{overflow-x:auto}
+.summary-table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border);min-width:500px}
+.summary-table th{background:var(--navy);color:#fff;padding:10px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.summary-table td{padding:9px 12px;font-size:12px;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+.summary-table tr:last-child td{border-bottom:none}
+.summary-table tr:hover td{background:var(--surface2)}
+.summary-table .num{text-align:right;font-weight:600}
+.summary-table .pos{color:var(--green)}.summary-table .neg{color:var(--red)}
+.summary-table tfoot td{font-weight:800;background:var(--blue-light);border-top:2px solid var(--blue)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){
+  .kpi-row{grid-template-columns:repeat(3,1fr)}
+  .chart-grid{grid-template-columns:1fr}
+  .two-col{grid-template-columns:1fr}
+  .scorecard-grid{grid-template-columns:repeat(2,1fr)}
+  .section-row.c3{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  .sidebar{display:none;position:fixed;top:60px;left:0;height:calc(100vh - 60px);z-index:99;overflow-y:auto}
+  .sidebar.open{display:flex}
+  .mob-nav-btn{display:block}
+  .header-title{font-size:13px}
+  .header-sub{display:none}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .account-grid{grid-template-columns:repeat(2,1fr)}
+  .scorecard-grid{grid-template-columns:1fr 1fr}
+  .section-row.c2{grid-template-columns:1fr}
+  .section-row.c3{grid-template-columns:1fr}
+  .chart-grid{grid-template-columns:1fr}
+  .two-col{grid-template-columns:1fr}
+  .main{padding:12px}
+}
+@media(max-width:480px){
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .account-grid{grid-template-columns:1fr 1fr}
+  .scorecard-grid{grid-template-columns:1fr}
+  .lang-btn{padding:3px 6px;font-size:9px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <button class="mob-nav-btn" onclick="toggleSidebar()">☰</button>
+    <div class="logo">FI</div>
+    <div>
+      <div class="header-title" data-i18n="headerTitle">Financial Intelligence Dashboard</div>
+      <div class="header-sub" data-i18n="headerSub">Slovenia &amp; Bosnia Operations · 6 Companies · 6 Accounts</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge"><span class="live-dot"></span> <span data-i18n="live">Live</span></div>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en',this)">EN</button>
+      <button class="lang-btn" onclick="setLang('de',this)">DE</button>
+      <button class="lang-btn" onclick="setLang('bs',this)">BS</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-section" data-i18n="navIntelligence">Intelligence</div>
+    <div class="nav-item active" onclick="nav(this,'overview')"><span class="nav-icon">📊</span> <span data-i18n="navOverview">Overview</span></div>
+    <div class="nav-item" onclick="nav(this,'briefing')"><span class="nav-icon">📋</span> <span data-i18n="navBriefing">Briefing</span></div>
+    <div class="nav-item" onclick="nav(this,'scorecard')"><span class="nav-icon">🏆</span> <span data-i18n="navScorecard">Health Scores</span></div>
+    <div class="nav-section" data-i18n="navRisk">Risk &amp; Audit</div>
+    <div class="nav-item" onclick="nav(this,'anomaly')"><span class="nav-icon">⚡</span> <span data-i18n="navAnomaly">Anomaly Pulse</span></div>
+    <div class="nav-item" onclick="nav(this,'trust')"><span class="nav-icon">🔍</span> <span data-i18n="navTrust">Trust Verify</span></div>
+    <div class="nav-item" onclick="nav(this,'duplicates')"><span class="nav-icon">🔎</span> <span data-i18n="navDuplicates">Duplicates</span></div>
+    <div class="nav-section" data-i18n="navAccounts">Accounts</div>
+    <div class="nav-item" onclick="nav(this,'accounts')"><span class="nav-icon">🏦</span> <span data-i18n="navAccountDetails">Account Details</span></div>
+    <div class="nav-item" onclick="nav(this,'summary')"><span class="nav-icon">📑</span> <span data-i18n="navSummary">Summary Table</span></div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ══════════════════════ OVERVIEW ══ -->
+    <div id="pg-overview" class="page active">
+      <div class="briefing-card">
+        <div class="briefing-header">
+          <div class="briefing-title" data-i18n="overviewBriefingTitle">⚡ Your Financial Briefing — May 27, 2026</div>
+          <div class="briefing-date" data-i18n="overviewBriefingDate">Auto-generated · Updated 09:41</div>
+        </div>
+        <div class="briefing-items">
+          <div class="briefing-item ok"><span class="briefing-icon">↑</span><div class="briefing-text" data-i18n="brief1"><strong>Net profit €115,870</strong> — up 12% vs January. All core operations in the green.</div></div>
+          <div class="briefing-item warn"><span class="briefing-icon">⏱</span><div class="briefing-text" data-i18n="brief2"><strong>BIH Payroll account</strong> reaches critical threshold in <strong>18 days</strong> at current burn rate.</div></div>
+          <div class="briefing-item alert"><span class="briefing-icon">⚠</span><div class="briefing-text" data-i18n="brief3"><strong>Unknown vendor "TechServis d.o.o."</strong> received €8,200 — no prior transaction history found.</div></div>
+          <div class="briefing-item warn"><span class="briefing-icon">⚑</span><div class="briefing-text" data-i18n="brief4"><strong>BIH Operations 2</strong> — reported income €48,000, bank shows €45,385. Gap of <strong>€2,615</strong> flagged.</div></div>
+          <div class="briefing-item alert"><span class="briefing-icon">🔎</span><div class="briefing-text" data-i18n="brief5"><strong>3 potential duplicate payments</strong> detected across accounts. Exposure: <strong>€12,400</strong>.</div></div>
+        </div>
+        <div class="briefing-footer">🔒 <span data-i18n="briefingFooter">Data sourced directly from bank feeds · Not from employee reports</span> · <span style="margin-left:auto" data-i18n="briefingSync">Last sync: 09:41 today</span></div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-label" data-i18n="kpiIncome">Total Income</div><div class="kpi-value g">€395,861</div><div class="kpi-trend up">↑ 8.3% vs Jan</div></div>
+        <div class="kpi-card"><div class="kpi-label" data-i18n="kpiExpenses">Total Expenses</div><div class="kpi-value r">€279,991</div><div class="kpi-trend down">↑ 3.1% vs Jan</div></div>
+        <div class="kpi-card"><div class="kpi-label" data-i18n="kpiProfit">Net Profit</div><div class="kpi-value b">€115,870</div><div class="kpi-trend up">↑ 12.0% vs Jan</div></div>
+        <div class="kpi-card"><div class="kpi-label" data-i18n="kpiCash">Total Cash</div><div class="kpi-value n">€289,244</div><div class="kpi-trend neu" data-i18n="kpiCashSub">6 accounts</div></div>
+        <div class="kpi-card"><div class="kpi-label" data-i18n="kpiAlerts">Active Alerts</div><div class="kpi-value r">7</div><div class="kpi-trend down" data-i18n="kpiAlertSub">↑ 2 new today</div></div>
+      </div>
+
+      <!-- CHARTS -->
+      <div class="chart-grid">
+        <div class="chart-card"><div class="card-title" data-i18n="chartCashflow">Cash Flow Trend — Jan–Feb 2026</div><div class="chart-wrap h110"><canvas id="cashflowChart"></canvas></div></div>
+        <div class="chart-card"><div class="card-title" data-i18n="chartMonthly">Income vs Expenses</div><div class="chart-wrap h110"><canvas id="monthlyBar"></canvas></div></div>
+      </div>
+      <div class="section-row c2">
+        <div class="chart-card"><div class="card-title" data-i18n="chartExpensePie">Expense Breakdown by Category</div><div class="chart-wrap h220"><canvas id="expensePie"></canvas></div></div>
+        <div class="chart-card"><div class="card-title" data-i18n="chartBalance">Account Balances (EUR)</div><div class="chart-wrap h160"><canvas id="balanceBar"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ BRIEFING ══ -->
+    <div id="pg-briefing" class="page">
+      <div class="briefing-card" style="max-width:780px">
+        <div class="briefing-header">
+          <div class="briefing-title" data-i18n="fullBriefingTitle">📋 60-Second Executive Briefing</div>
+          <div class="briefing-date" data-i18n="fullBriefingDate">May 27, 2026 · Auto-generated at 09:41</div>
+        </div>
+        <div class="briefing-items">
+          <div class="briefing-item ok"><span class="briefing-icon">↑</span><div class="briefing-text" data-i18n="fullBrief1"><strong>Net profit €115,870</strong> — improved 12% vs January. February income €177K held steady despite fewer working days.</div></div>
+          <div class="briefing-item ok"><span class="briefing-icon">✓</span><div class="briefing-text" data-i18n="fullBrief2"><strong>SLO operations are healthy.</strong> Both Slovenia accounts show positive cash flow and runway exceeding 90 days.</div></div>
+          <div class="briefing-item warn"><span class="briefing-icon">⏱</span><div class="briefing-text" data-i18n="fullBrief3"><strong>BIH Payroll is critically underfunded.</strong> Current balance €14,579 against average monthly outflow of €27,700. Reaches zero in approximately 18 days without a top-up.</div></div>
+          <div class="briefing-item alert"><span class="briefing-icon">⚠</span><div class="briefing-text" data-i18n="fullBrief4"><strong>New unknown vendor flagged.</strong> "TechServis d.o.o." received €8,200 on May 24 — no transaction history in any account prior to this payment. Requires your review.</div></div>
+          <div class="briefing-item warn"><span class="briefing-icon">⚑</span><div class="briefing-text" data-i18n="fullBrief5"><strong>Reporting discrepancy detected.</strong> BIH Operations 2 reported income of €48,000. Bank shows €45,385. Gap of €2,615 (5.4%) flagged for clarification.</div></div>
+          <div class="briefing-item alert"><span class="briefing-icon">🔎</span><div class="briefing-text" data-i18n="fullBrief6"><strong>3 suspected duplicate payments.</strong> Total exposure: €12,400. Two pairs involve the same vendor on close dates. One pair crosses two accounts. All await your review.</div></div>
+          <div class="briefing-item warn"><span class="briefing-icon">📉</span><div class="briefing-text" data-i18n="fullBrief7"><strong>Professional services spend up 240%</strong> in BIH Operations 2 vs prior 3-month average. Top driver: €17,200 to a legal consultancy on Feb 19.</div></div>
+        </div>
+        <div class="briefing-footer">📡 <span data-i18n="fullBriefingFooter">Data sourced directly from bank feeds — independent of employee reports</span> · <span style="margin-left:auto" data-i18n="fullBriefingNext">Next auto-update: 17:00 today</span></div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--text2);max-width:780px;padding:0 4px" data-i18n="briefingNote">
+        This briefing is generated automatically from live bank data. It is not derived from any employee report. All figures are raw transaction data. Flagged items require your attention before end of day.
+      </div>
+    </div>
+
+    <!-- ══════════════════════ SCORECARD ══ -->
+    <div id="pg-scorecard" class="page">
+      <div class="chart-card" style="margin-bottom:0">
+        <div class="trust-header">
+          <div class="card-title" style="margin:0" data-i18n="scorecardTitle">🏆 Company Health Scorecard — Ranked</div>
+          <div class="verified-stamp" data-i18n="scorecardVerified">✓ Scores based on live bank data</div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:16px" data-i18n="scorecardDesc">Composite score 0–100 across: Cash Runway · Income Trend · Expense Growth · Anomaly Count · Balance Stability. Ranked best → worst.</div>
+        <div class="scorecard-grid" id="scorecard-grid"></div>
+      </div>
+      <div class="chart-card">
+        <div class="card-title" data-i18n="scorecardBarTitle">Score Component Breakdown</div>
+        <div class="chart-wrap h120"><canvas id="scorecardBar"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ ANOMALY ══ -->
+    <div id="pg-anomaly" class="page">
+      <div class="chart-card" style="margin-bottom:0">
+        <div class="trust-header">
+          <div class="card-title" style="margin:0" data-i18n="anomalyTitle">⚡ Anomaly Pulse — Live Alert Feed</div>
+          <div style="font-size:11px;background:var(--red-light);color:var(--red);padding:4px 10px;border-radius:20px;font-weight:700" data-i18n="anomalyActive">7 Active Alerts</div>
+        </div>
+        <div class="two-col">
+          <div>
+            <div class="heatmap-wrap">
+              <div class="heatmap-title" data-i18n="heatmapTitle">Anomaly Heatmap — May 2026 (darker = more anomalies)</div>
+              <div class="heatmap" id="heatmap"></div>
+            </div>
+            <div class="chart-card" style="margin-top:14px;box-shadow:none;border-color:var(--border)">
+              <div class="card-title" data-i18n="anomalyBarTitle">Anomaly Frequency by Account</div>
+              <div class="chart-wrap h140"><canvas id="anomalyBar"></canvas></div>
+            </div>
+          </div>
+          <div>
+            <div class="card-title" data-i18n="alertFeedTitle">Alert Feed</div>
+            <div class="alert-feed" id="alert-feed"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ TRUST ══ -->
+    <div id="pg-trust" class="page">
+      <div class="chart-card" style="margin-bottom:0">
+        <div class="trust-header">
+          <div>
+            <div class="card-title" style="margin:0" data-i18n="trustTitle">🔍 Trust Verification Layer</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:3px" data-i18n="trustDesc">Reported figures vs bank reality — independent comparison</div>
+          </div>
+          <div class="verified-stamp" data-i18n="trustVerified">🔒 Last verified: today, 09:41</div>
+        </div>
+        <div class="trust-table-wrap">
+          <table class="trust-table" id="trust-table">
+            <thead><tr>
+              <th data-i18n="thCompany">Company</th>
+              <th data-i18n="thAccount">Account</th>
+              <th class="num" data-i18n="thRepInc">Reported Income</th>
+              <th class="num" data-i18n="thBankInc">Bank Income</th>
+              <th class="num" data-i18n="thRepExp">Reported Expenses</th>
+              <th class="num" data-i18n="thBankExp">Bank Expenses</th>
+              <th data-i18n="thIncMatch">Income Match</th>
+              <th data-i18n="thExpMatch">Expense Match</th>
+            </tr></thead>
+            <tbody id="trust-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="section-row c2" style="margin-top:16px">
+        <div class="chart-card">
+          <div class="card-title" data-i18n="trustIncTitle">Reported vs Bank — Income by Company</div>
+          <div class="chart-wrap h160"><canvas id="trustIncomeBar"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="card-title" data-i18n="trustExpTitle">Reported vs Bank — Expenses by Company</div>
+          <div class="chart-wrap h160"><canvas id="trustExpenseBar"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ DUPLICATES ══ -->
+    <div id="pg-duplicates" class="page">
+      <div class="section-row c2">
+        <div>
+          <div class="chart-card" style="margin-bottom:0">
+            <div class="card-title" data-i18n="dupTitle">🔎 Duplicate &amp; Ghost Payment Scanner</div>
+            <div class="dup-summary">
+              <div><div class="dup-sum-num">€12,400</div><div class="dup-sum-text" data-i18n="dupExposure">Potential duplicate<br>exposure this quarter</div></div>
+              <div style="width:1px;background:rgba(192,57,43,.2);align-self:stretch"></div>
+              <div><div class="dup-sum-num">3</div><div class="dup-sum-text" data-i18n="dupPairs">Suspect pairs<br>awaiting review</div></div>
+              <div style="width:1px;background:rgba(192,57,43,.2);align-self:stretch"></div>
+              <div><div class="dup-sum-num">0</div><div class="dup-sum-text" data-i18n="dupResolved">Reviewed &amp; resolved<br>this month</div></div>
+            </div>
+            <div id="dup-pairs"></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="card-title" data-i18n="dupBarTitle">Duplicate Exposure by Account (€)</div>
+          <div class="chart-wrap h180"><canvas id="dupBar"></canvas></div>
+          <div style="margin-top:16px">
+            <div class="card-title" data-i18n="dupHowTitle">How the Scanner Works</div>
+            <div style="font-size:11px;color:var(--text2);line-height:1.7;margin-top:4px">
+              <div data-i18n="dupHow1">✓ Scans all transactions across all 6 accounts</div>
+              <div data-i18n="dupHow2">✓ Flags pairs: same vendor ± same amount ± within 30 days</div>
+              <div data-i18n="dupHow3">✓ Assigns confidence score (amount match + timing + payee similarity)</div>
+              <div data-i18n="dupHow4">✓ One-click resolution — Legitimate or Flag for Review</div>
+              <div style="margin-top:8px;padding:8px;background:var(--amber-light);border-radius:8px;color:#7D6608;font-weight:600" data-i18n="dupNote">⚠ Cross-account detection is not possible in standard bank apps. This scanner covers all 6 accounts simultaneously.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ ACCOUNTS ══ -->
+    <div id="pg-accounts" class="page">
+      <div class="total-cash-bar">
+        <div><div class="tcb-label" data-i18n="totalCashLabel">Total Available Cash — All Accounts</div><div class="tcb-value">€289,244</div></div>
+        <div style="text-align:right"><div class="tcb-sub" data-i18n="totalCashSub1">6 accounts · 2 countries · EUR equivalent</div><div class="tcb-sub" data-i18n="totalCashSub2">Converted at today's BAM/EUR rate</div></div>
+      </div>
+      <div class="account-grid">
+        <div class="account-tile"><div class="acc-name">SLO Main Operations</div><span class="acc-country slo">Slovenia</span><div class="acc-amount">€52,903</div></div>
+        <div class="account-tile"><div class="acc-name">SLO Payroll</div><span class="acc-country slo">Slovenia</span><div class="acc-amount">€27,256</div></div>
+        <div class="account-tile low"><div class="acc-name">BIH Operations 1</div><span class="acc-country bih">Bosnia</span><div class="acc-amount">€4,782</div><div class="acc-warning" data-i18n="accLow">⚠ Low balance</div></div>
+        <div class="account-tile"><div class="acc-name">BIH Operations 2</div><span class="acc-country bih">Bosnia</span><div class="acc-amount">€18,957</div></div>
+        <div class="account-tile critical"><div class="acc-name">BIH Payroll</div><span class="acc-country bih">Bosnia</span><div class="acc-amount neg">−€22,368</div><div class="acc-critical" data-i18n="accCritical">🔴 Critical — 18 days to zero</div></div>
+        <div class="account-tile"><div class="acc-name">BIH Reserve</div><span class="acc-country bih">Bosnia</span><div class="acc-amount">€34,340</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="card-title" data-i18n="categoryBarTitle">Detailed Analysis — Expenses by Category</div>
+        <div class="chart-wrap h140"><canvas id="categoryBar"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ SUMMARY ══ -->
+    <div id="pg-summary" class="page">
+      <div class="chart-card" style="padding:0;overflow:hidden">
+        <div class="summary-table-wrap">
+          <table class="summary-table">
+            <thead><tr>
+              <th data-i18n="sumAccount">Account</th>
+              <th data-i18n="sumCountry">Country</th>
+              <th data-i18n="sumCurrency">Currency</th>
+              <th class="num" data-i18n="sumIncome">Income</th>
+              <th class="num" data-i18n="sumExpenses">Expenses</th>
+              <th class="num" data-i18n="sumNet">Net</th>
+              <th class="num" data-i18n="sumBalance">Balance</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>SLO_MAIN_OPERATIONS</td><td data-i18n="ctSlovenia">Slovenia</td><td>EUR</td><td class="num pos">€79,578</td><td class="num neg">€26,675</td><td class="num pos">€52,903</td><td class="num">€99,038</td></tr>
+              <tr><td>SLO_PAYROLL_ACCOUNT</td><td data-i18n="ctSlovenia">Slovenia</td><td>EUR</td><td class="num pos">€154,085</td><td class="num neg">€126,829</td><td class="num pos">€27,256</td><td class="num">€68,174</td></tr>
+              <tr><td>BIH_OPERATIONS_1</td><td data-i18n="ctBosnia">Bosnia</td><td>BAM</td><td class="num pos">€23,496</td><td class="num neg">€18,713</td><td class="num pos">€4,782</td><td class="num">€21,710</td></tr>
+              <tr><td>BIH_OPERATIONS_2</td><td data-i18n="ctBosnia">Bosnia</td><td>BAM</td><td class="num pos">€45,385</td><td class="num neg">€26,428</td><td class="num pos">€18,957</td><td class="num">€35,214</td></tr>
+              <tr><td>BIH_PAYROLL</td><td data-i18n="ctBosnia">Bosnia</td><td>BAM</td><td class="num pos">€33,188</td><td class="num neg">€55,556</td><td class="num neg">−€22,368</td><td class="num">€14,579</td></tr>
+              <tr><td>BIH_RESERVE_ACCOUNT</td><td data-i18n="ctBosnia">Bosnia</td><td>BAM</td><td class="num pos">€60,129</td><td class="num neg">€25,789</td><td class="num pos">€34,340</td><td class="num">€50,529</td></tr>
+            </tbody>
+            <tfoot><tr><td colspan="3"><strong data-i18n="sumTotal">TOTAL</strong></td><td class="num">€395,861</td><td class="num">€279,991</td><td class="num">€115,870</td><td class="num">€289,244</td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════════════════════════════
+const T = {
+  en: {
+    headerTitle:'Financial Intelligence Dashboard',
+    headerSub:'Slovenia & Bosnia Operations · 6 Companies · 6 Accounts',
+    live:'Live',
+    navIntelligence:'Intelligence',
+    navOverview:'Overview',
+    navBriefing:'Briefing',
+    navScorecard:'Health Scores',
+    navRisk:'Risk & Audit',
+    navAnomaly:'Anomaly Pulse',
+    navTrust:'Trust Verify',
+    navDuplicates:'Duplicates',
+    navAccounts:'Accounts',
+    navAccountDetails:'Account Details',
+    navSummary:'Summary Table',
+    overviewBriefingTitle:'⚡ Your Financial Briefing — May 27, 2026',
+    overviewBriefingDate:'Auto-generated · Updated 09:41',
+    brief1:'<strong>Net profit €115,870</strong> — up 12% vs January. All core operations in the green.',
+    brief2:'<strong>BIH Payroll account</strong> reaches critical threshold in <strong>18 days</strong> at current burn rate.',
+    brief3:'<strong>Unknown vendor "TechServis d.o.o."</strong> received €8,200 — no prior transaction history found.',
+    brief4:'<strong>BIH Operations 2</strong> — reported income €48,000, bank shows €45,385. Gap of <strong>€2,615</strong> flagged.',
+    brief5:'<strong>3 potential duplicate payments</strong> detected across accounts. Exposure: <strong>€12,400</strong>.',
+    briefingFooter:'Data sourced directly from bank feeds · Not from employee reports',
+    briefingSync:'Last sync: 09:41 today',
+    kpiIncome:'Total Income', kpiExpenses:'Total Expenses', kpiProfit:'Net Profit',
+    kpiCash:'Total Cash', kpiCashSub:'6 accounts', kpiAlerts:'Active Alerts', kpiAlertSub:'↑ 2 new today',
+    chartCashflow:'Cash Flow Trend — Jan–Feb 2026',
+    chartMonthly:'Income vs Expenses',
+    chartExpensePie:'Expense Breakdown by Category',
+    chartBalance:'Account Balances (EUR)',
+    fullBriefingTitle:'📋 60-Second Executive Briefing',
+    fullBriefingDate:'May 27, 2026 · Auto-generated at 09:41',
+    fullBrief1:'<strong>Net profit €115,870</strong> — improved 12% vs January. February income €177K held steady despite fewer working days.',
+    fullBrief2:'<strong>SLO operations are healthy.</strong> Both Slovenia accounts show positive cash flow and runway exceeding 90 days.',
+    fullBrief3:'<strong>BIH Payroll is critically underfunded.</strong> Current balance €14,579 against average monthly outflow of €27,700. Reaches zero in approximately 18 days without a top-up.',
+    fullBrief4:'<strong>New unknown vendor flagged.</strong> "TechServis d.o.o." received €8,200 on May 24 — no transaction history in any account prior to this payment. Requires your review.',
+    fullBrief5:'<strong>Reporting discrepancy detected.</strong> BIH Operations 2 reported income of €48,000. Bank shows €45,385. Gap of €2,615 (5.4%) flagged for clarification.',
+    fullBrief6:'<strong>3 suspected duplicate payments.</strong> Total exposure: €12,400. Two pairs involve the same vendor on close dates. One pair crosses two accounts. All await your review.',
+    fullBrief7:'<strong>Professional services spend up 240%</strong> in BIH Operations 2 vs prior 3-month average. Top driver: €17,200 to a legal consultancy on Feb 19.',
+    fullBriefingFooter:'Data sourced directly from bank feeds — independent of employee reports',
+    fullBriefingNext:'Next auto-update: 17:00 today',
+    briefingNote:'This briefing is generated automatically from live bank data. It is not derived from any employee report. All figures are raw transaction data. Flagged items require your attention before end of day.',
+    scorecardTitle:'🏆 Company Health Scorecard — Ranked',
+    scorecardVerified:'✓ Scores based on live bank data',
+    scorecardDesc:'Composite score 0–100 across: Cash Runway · Income Trend · Expense Growth · Anomaly Count · Balance Stability. Ranked best → worst.',
+    scorecardBarTitle:'Score Component Breakdown',
+    anomalyTitle:'⚡ Anomaly Pulse — Live Alert Feed',
+    anomalyActive:'7 Active Alerts',
+    heatmapTitle:'Anomaly Heatmap — May 2026 (darker = more anomalies)',
+    anomalyBarTitle:'Anomaly Frequency by Account',
+    alertFeedTitle:'Alert Feed',
+    trustTitle:'🔍 Trust Verification Layer',
+    trustDesc:'Reported figures vs bank reality — independent comparison',
+    trustVerified:'🔒 Last verified: today, 09:41',
+    thCompany:'Company', thAccount:'Account', thRepInc:'Reported Income', thBankInc:'Bank Income',
+    thRepExp:'Reported Expenses', thBankExp:'Bank Expenses', thIncMatch:'Income Match', thExpMatch:'Expense Match',
+    trustIncTitle:'Reported vs Bank — Income by Company',
+    trustExpTitle:'Reported vs Bank — Expenses by Company',
+    dupTitle:'🔎 Duplicate & Ghost Payment Scanner',
+    dupExposure:'Potential duplicate<br>exposure this quarter',
+    dupPairs:'Suspect pairs<br>awaiting review',
+    dupResolved:'Reviewed & resolved<br>this month',
+    dupBarTitle:'Duplicate Exposure by Account (€)',
+    dupHowTitle:'How the Scanner Works',
+    dupHow1:'✓ Scans all transactions across all 6 accounts',
+    dupHow2:'✓ Flags pairs: same vendor ± same amount ± within 30 days',
+    dupHow3:'✓ Assigns confidence score (amount match + timing + payee similarity)',
+    dupHow4:'✓ One-click resolution — Legitimate or Flag for Review',
+    dupNote:'⚠ Cross-account detection is not possible in standard bank apps. This scanner covers all 6 accounts simultaneously.',
+    totalCashLabel:'Total Available Cash — All Accounts',
+    totalCashSub1:'6 accounts · 2 countries · EUR equivalent',
+    totalCashSub2:"Converted at today's BAM/EUR rate",
+    accLow:'⚠ Low balance', accCritical:'🔴 Critical — 18 days to zero',
+    categoryBarTitle:'Detailed Analysis — Expenses by Category',
+    sumAccount:'Account', sumCountry:'Country', sumCurrency:'Currency',
+    sumIncome:'Income', sumExpenses:'Expenses', sumNet:'Net', sumBalance:'Balance', sumTotal:'TOTAL',
+    ctSlovenia:'Slovenia', ctBosnia:'Bosnia',
+    // Chart labels
+    cLabelJanuary:'January', cLabelFebruary:'February',
+    cLabelIncome:'Income', cLabelExpenses:'Expenses',
+    cLabelReported:'Reported', cLabelBank:'Bank',
+    cLabelDupExposure:'Duplicate Exposure',
+    cLabelLiquidity:'Liquidity', cLabelTrend:'Trend', cLabelRisk:'Risk', cLabelEfficiency:'Efficiency',
+    cLabelAlerts:'alerts', cLabelAlert:'alert',
+    // Scorecard pills
+    pillLiq:'Liq', pillTrend:'Trend', pillRisk:'Risk', pillEff:'Eff',
+    pillTipLiq:'Cash Runway & Liquidity', pillTipTrend:'Income Trend', pillTipRisk:'Anomaly & Fraud Risk', pillTipEff:'Expense Efficiency',
+    scRankOf:'of',
+    // Trust badge
+    matchOk:'✓ Match', matchMinor:'⚠ Minor gap', matchMismatch:'⛔ Mismatch',
+    // Alert actions
+    btnInvestigate:'Investigate', btnDismiss:'Dismiss',
+    btnLegit:'✓ Mark Legitimate', btnFlag:'⛔ Flag for Review', btnFlagged:'🚩 Flagged',
+    // Dup bracket
+    daysApart:'days apart',
+    likelyDup:'% likely duplicate',
+    // Heatmap
+    hmNoAnomalies:'No anomalies', hmAnomalies:'anomaly', hmAnomaliesPlural:'anomalies',
+    // Alert data
+    alerts:[
+      {sev:'high',desc:'Unknown vendor "TechServis d.o.o." — €8,200',meta:'BIH Operations 2 · May 24'},
+      {sev:'high',desc:'Transaction 240% above category average — Professional Services',meta:'BIH Operations 2 · May 19 · €17,200'},
+      {sev:'high',desc:'Weekend transfer €23,625 to external account',meta:'SLO Payroll · Feb 04'},
+      {sev:'med',desc:'New payee — first-time vendor "AdServis j.d.o.o." — €1,840',meta:'SLO Main Operations · May 16'},
+      {sev:'med',desc:'Duplicate pattern detected — same amount, 3-day gap',meta:'BIH Reserve · €4,600 × 2'},
+      {sev:'med',desc:'Salary payment 18% above last month',meta:'BIH Payroll · May 01 · €33,188'},
+      {sev:'low',desc:'Banking fee spike — €340 vs avg €52/month',meta:'BIH Operations 1 · April'},
+    ],
+    // Expense categories
+    cats:[['Salary',198918],['Marketing',19099],['Professional Services',17924],['Travel & Transport',12579],['Office Rent',8696],['Insurance',6413],['Training',5750],['Software',5604],['Utilities',1966],['Supplies',1496],['Telecom',924],['Banking Fees',620]],
+    // Account short names for charts
+    accShort:['SLO Main','SLO Payroll','BIH Ops 1','BIH Ops 2','BIH Payroll','BIH Reserve'],
+    trustNames:['SLO Main','SLO Payroll','BIH Ops 1','BIH Ops 2','BIH Payroll','BIH Reserve'],
+    dupAccLabels:['BIH Operations 2','BIH Reserve','SLO Main','BIH Operations 1'],
+    scorecardCompanyNames:['SLO Main','SLO Payroll','BIH Reserve','BIH Ops 2','BIH Ops 1','BIH Payroll'],
+  },
+  de: {
+    headerTitle:'Finanz-Intelligence-Dashboard',
+    headerSub:'Slowenien & Bosnien · 6 Unternehmen · 6 Konten',
+    live:'Live',
+    navIntelligence:'Übersicht',
+    navOverview:'Überblick',
+    navBriefing:'Briefing',
+    navScorecard:'Gesundheitswerte',
+    navRisk:'Risiko & Prüfung',
+    navAnomaly:'Anomalie-Pulse',
+    navTrust:'Vertrauensprüfung',
+    navDuplicates:'Duplikate',
+    navAccounts:'Konten',
+    navAccountDetails:'Kontodetails',
+    navSummary:'Zusammenfassung',
+    overviewBriefingTitle:'⚡ Ihr Finanzbriefing — 27. Mai 2026',
+    overviewBriefingDate:'Automatisch erstellt · Aktualisiert 09:41',
+    brief1:'<strong>Nettogewinn €115.870</strong> — 12 % über Januar. Alle Kernbereiche im grünen Bereich.',
+    brief2:'<strong>BIH-Lohnkonto</strong> erreicht in <strong>18 Tagen</strong> den kritischen Schwellenwert.',
+    brief3:'<strong>Unbekannter Lieferant „TechServis d.o.o."</strong> erhielt €8.200 — keine frühere Transaktionshistorie.',
+    brief4:'<strong>BIH Operations 2</strong> — gemeldetes Einkommen €48.000, Bank zeigt €45.385. Lücke von <strong>€2.615</strong> markiert.',
+    brief5:'<strong>3 potenzielle Doppelzahlungen</strong> kontoübergreifend erkannt. Risiko: <strong>€12.400</strong>.',
+    briefingFooter:'Daten direkt aus Bankfeeds · Nicht aus Mitarbeiterberichten',
+    briefingSync:'Letzte Synchronisation: 09:41 heute',
+    kpiIncome:'Gesamteinnahmen', kpiExpenses:'Gesamtausgaben', kpiProfit:'Nettogewinn',
+    kpiCash:'Gesamtkasse', kpiCashSub:'6 Konten', kpiAlerts:'Aktive Warnungen', kpiAlertSub:'↑ 2 neu heute',
+    chartCashflow:'Cashflow-Trend — Jan–Feb 2026',
+    chartMonthly:'Einnahmen vs. Ausgaben',
+    chartExpensePie:'Ausgaben nach Kategorie',
+    chartBalance:'Kontosalden (EUR)',
+    fullBriefingTitle:'📋 60-Sekunden-Führungsbriefing',
+    fullBriefingDate:'27. Mai 2026 · Automatisch um 09:41 erstellt',
+    fullBrief1:'<strong>Nettogewinn €115.870</strong> — 12 % Verbesserung gegenüber Januar. Februar-Einnahmen €177K trotz weniger Arbeitstage stabil.',
+    fullBrief2:'<strong>SLO-Betrieb ist gesund.</strong> Beide Slowenien-Konten zeigen positiven Cashflow und Laufzeit von über 90 Tagen.',
+    fullBrief3:'<strong>BIH-Lohn kritisch unterfinanziert.</strong> Aktueller Saldo €14.579 bei monatlichem Abfluss von €27.700. Nullpunkt in ca. 18 Tagen ohne Aufstockung.',
+    fullBrief4:'<strong>Neuer unbekannter Lieferant markiert.</strong> „TechServis d.o.o." erhielt am 24. Mai €8.200 — keine frühere Transaktionshistorie. Ihre Überprüfung erforderlich.',
+    fullBrief5:'<strong>Berichtsdiskrepanz erkannt.</strong> BIH Operations 2 meldete €48.000 Einnahmen. Bank zeigt €45.385. Lücke €2.615 (5,4 %) markiert.',
+    fullBrief6:'<strong>3 Verdächtige Doppelzahlungen.</strong> Gesamtrisiko: €12.400. Zwei Paare mit gleichem Lieferanten in engem zeitlichen Abstand. Ein Paar über zwei Konten.',
+    fullBrief7:'<strong>Professionsdienstleistungsausgaben 240 % gestiegen</strong> bei BIH Operations 2. Haupttreiber: €17.200 an eine Rechtsberatung am 19. Feb.',
+    fullBriefingFooter:'Daten direkt aus Bankfeeds — unabhängig von Mitarbeiterberichten',
+    fullBriefingNext:'Nächste automatische Aktualisierung: 17:00 heute',
+    briefingNote:'Dieses Briefing wird automatisch aus Live-Bankdaten generiert. Es basiert nicht auf Mitarbeiterberichten. Alle Zahlen sind rohe Transaktionsdaten. Markierte Punkte erfordern Ihre Aufmerksamkeit bis Tagesende.',
+    scorecardTitle:'🏆 Unternehmensgesundheit — Ranking',
+    scorecardVerified:'✓ Bewertungen basieren auf Live-Bankdaten',
+    scorecardDesc:'Gesamtwertung 0–100: Liquiditätsreserve · Einkommenstrend · Ausgabenwachstum · Anomalieanzahl · Bilanzkontinuität. Beste → schlechteste.',
+    scorecardBarTitle:'Komponentenaufschlüsselung',
+    anomalyTitle:'⚡ Anomalie-Pulse — Live-Warnungsfeed',
+    anomalyActive:'7 aktive Warnungen',
+    heatmapTitle:'Anomalie-Heatmap — Mai 2026 (dunkler = mehr Anomalien)',
+    anomalyBarTitle:'Anomaliehäufigkeit nach Konto',
+    alertFeedTitle:'Warnungsfeed',
+    trustTitle:'🔍 Vertrauensverifizierungsschicht',
+    trustDesc:'Gemeldete Zahlen vs. Bankwirklichkeit — unabhängiger Vergleich',
+    trustVerified:'🔒 Zuletzt verifiziert: heute, 09:41',
+    thCompany:'Unternehmen', thAccount:'Konto', thRepInc:'Gemeldetes Einkommen', thBankInc:'Bankeinkommen',
+    thRepExp:'Gemeldete Ausgaben', thBankExp:'Bankausgaben', thIncMatch:'Einkommens-Match', thExpMatch:'Ausgaben-Match',
+    trustIncTitle:'Gemeldet vs. Bank — Einnahmen',
+    trustExpTitle:'Gemeldet vs. Bank — Ausgaben',
+    dupTitle:'🔎 Duplikat- & Geisterzahlungs-Scanner',
+    dupExposure:'Potenzielles Duplikat-<br>Risiko dieses Quartals',
+    dupPairs:'Verdächtige Paare<br>zur Überprüfung',
+    dupResolved:'Überprüft & gelöst<br>diesen Monat',
+    dupBarTitle:'Duplikat-Risiko nach Konto (€)',
+    dupHowTitle:'Wie der Scanner funktioniert',
+    dupHow1:'✓ Scannt alle Transaktionen über alle 6 Konten',
+    dupHow2:'✓ Markiert Paare: gleicher Lieferant ± gleicher Betrag ± innerhalb 30 Tagen',
+    dupHow3:'✓ Vergibt Konfidenzwert (Betragsübereinstimmung + Timing + Empfängerähnlichkeit)',
+    dupHow4:'✓ Ein-Klick-Auflösung — Legitim oder Zur Überprüfung markieren',
+    dupNote:'⚠ Kontoübergreifende Erkennung ist in Standard-Banking-Apps nicht möglich. Dieser Scanner deckt alle 6 Konten gleichzeitig ab.',
+    totalCashLabel:'Gesamt verfügbare Kasse — alle Konten',
+    totalCashSub1:'6 Konten · 2 Länder · EUR-Äquivalent',
+    totalCashSub2:'Zum heutigen BAM/EUR-Kurs umgerechnet',
+    accLow:'⚠ Niedriger Saldo', accCritical:'🔴 Kritisch — 18 Tage bis Null',
+    categoryBarTitle:'Detailanalyse — Ausgaben nach Kategorie',
+    sumAccount:'Konto', sumCountry:'Land', sumCurrency:'Währung',
+    sumIncome:'Einnahmen', sumExpenses:'Ausgaben', sumNet:'Netto', sumBalance:'Saldo', sumTotal:'GESAMT',
+    ctSlovenia:'Slowenien', ctBosnia:'Bosnien',
+    cLabelJanuary:'Januar', cLabelFebruary:'Februar',
+    cLabelIncome:'Einnahmen', cLabelExpenses:'Ausgaben',
+    cLabelReported:'Gemeldet', cLabelBank:'Bank',
+    cLabelDupExposure:'Duplikat-Risiko',
+    cLabelLiquidity:'Liquidität', cLabelTrend:'Trend', cLabelRisk:'Risiko', cLabelEfficiency:'Effizienz',
+    cLabelAlerts:'Warnungen', cLabelAlert:'Warnung',
+    pillLiq:'Liq', pillTrend:'Trend', pillRisk:'Risiko', pillEff:'Eff',
+    pillTipLiq:'Liquiditätsreserve', pillTipTrend:'Einkommenstrend', pillTipRisk:'Anomalie & Betrugsrisiko', pillTipEff:'Ausgabeneffizienz',
+    scRankOf:'von',
+    matchOk:'✓ Übereinstimmung', matchMinor:'⚠ Kleine Lücke', matchMismatch:'⛔ Abweichung',
+    btnInvestigate:'Untersuchen', btnDismiss:'Ablehnen',
+    btnLegit:'✓ Als legitim markieren', btnFlag:'⛔ Zur Überprüfung markieren', btnFlagged:'🚩 Markiert',
+    daysApart:'Tage Abstand',
+    likelyDup:'% wahrscheinliches Duplikat',
+    hmNoAnomalies:'Keine Anomalien', hmAnomalies:'Anomalie', hmAnomaliesPlural:'Anomalien',
+    alerts:[
+      {sev:'high',desc:'Unbekannter Lieferant „TechServis d.o.o." — €8.200',meta:'BIH Operations 2 · 24. Mai'},
+      {sev:'high',desc:'Transaktion 240 % über Kategorie-Durchschnitt — Beratungsleistungen',meta:'BIH Operations 2 · 19. Mai · €17.200'},
+      {sev:'high',desc:'Wochenendüberweisung €23.625 an externes Konto',meta:'SLO Lohn · 04. Feb'},
+      {sev:'med',desc:'Neuer Empfänger — Erstlieferant „AdServis j.d.o.o." — €1.840',meta:'SLO Hauptbetrieb · 16. Mai'},
+      {sev:'med',desc:'Duplikatmuster erkannt — gleicher Betrag, 3-Tage-Abstand',meta:'BIH Reserve · €4.600 × 2'},
+      {sev:'med',desc:'Gehaltszahlung 18 % über Vormonat',meta:'BIH Lohn · 01. Mai · €33.188'},
+      {sev:'low',desc:'Bankgebühren-Spike — €340 vs. Durchschnitt €52/Monat',meta:'BIH Operations 1 · April'},
+    ],
+    cats:[['Gehalt',198918],['Marketing',19099],['Beratungsleistungen',17924],['Reise & Transport',12579],['Büromiete',8696],['Versicherung',6413],['Schulung',5750],['Software',5604],['Nebenkosten',1966],['Bürobedarf',1496],['Telekom',924],['Bankgebühren',620]],
+    accShort:['SLO Haupt','SLO Lohn','BIH Ops 1','BIH Ops 2','BIH Lohn','BIH Reserve'],
+    trustNames:['SLO Haupt','SLO Lohn','BIH Ops 1','BIH Ops 2','BIH Lohn','BIH Reserve'],
+    dupAccLabels:['BIH Operations 2','BIH Reserve','SLO Haupt','BIH Operations 1'],
+    scorecardCompanyNames:['SLO Haupt','SLO Lohn','BIH Reserve','BIH Ops 2','BIH Ops 1','BIH Lohn'],
+  },
+  bs: {
+    headerTitle:'Dashboard Finansijske Inteligencije',
+    headerSub:'Operacije Slovenija & BiH · 6 kompanija · 6 računa',
+    live:'Uživo',
+    navIntelligence:'Inteligencija',
+    navOverview:'Pregled',
+    navBriefing:'Izvještaj',
+    navScorecard:'Zdravstveni Skor',
+    navRisk:'Rizici & Revizija',
+    navAnomaly:'Anomalije',
+    navTrust:'Provjera Pouzdanosti',
+    navDuplicates:'Duplikati',
+    navAccounts:'Računi',
+    navAccountDetails:'Detalji Računa',
+    navSummary:'Sumarni Pregled',
+    overviewBriefingTitle:'⚡ Vaš Finansijski Izvještaj — 27. maj 2026.',
+    overviewBriefingDate:'Automatski generisano · Ažurirano 09:41',
+    brief1:'<strong>Neto profit €115.870</strong> — rast 12% u poređenju s januarom. Sve ključne operacije u pozitivnoj zoni.',
+    brief2:'<strong>BIH platni račun</strong> dostiže kritičnu granicu za <strong>18 dana</strong> pri trenutnoj stopi troškova.',
+    brief3:'<strong>Nepoznati dobavljač „TechServis d.o.o."</strong> primio €8.200 — nema prethodne historije transakcija.',
+    brief4:'<strong>BIH Operations 2</strong> — prijavljeni prihod €48.000, banka pokazuje €45.385. Razlika od <strong>€2.615</strong> označena.',
+    brief5:'<strong>3 potencijalne duple uplate</strong> otkrivene na računima. Izloženost: <strong>€12.400</strong>.',
+    briefingFooter:'Podaci direktno iz bankovnih feedova · Nisu iz izvještaja zaposlenika',
+    briefingSync:'Posljednja sinhronizacija: 09:41 danas',
+    kpiIncome:'Ukupni Prihodi', kpiExpenses:'Ukupni Rashodi', kpiProfit:'Neto Profit',
+    kpiCash:'Ukupna Gotovina', kpiCashSub:'6 računa', kpiAlerts:'Aktivna Upozorenja', kpiAlertSub:'↑ 2 nova danas',
+    chartCashflow:'Trend Novčanog Toka — Jan–Feb 2026',
+    chartMonthly:'Prihodi vs. Rashodi',
+    chartExpensePie:'Rashodi po Kategoriji',
+    chartBalance:'Stanja Računa (EUR)',
+    fullBriefingTitle:'📋 Izvršni Izvještaj — 60 Sekundi',
+    fullBriefingDate:'27. maj 2026. · Automatski generisano u 09:41',
+    fullBrief1:'<strong>Neto profit €115.870</strong> — poboljšanje od 12% u odnosu na januar. Februarski prihod €177K stabilan unatoč manjem broju radnih dana.',
+    fullBrief2:'<strong>SLO operacije su zdrave.</strong> Oba slovenska računa pokazuju pozitivan novčani tok s rezervom dužom od 90 dana.',
+    fullBrief3:'<strong>BIH platni račun kritično podfinansiran.</strong> Trenutni saldo €14.579 nasuprot prosječnom mjesečnom odljevu od €27.700. Nula za otprilike 18 dana bez dopune.',
+    fullBrief4:'<strong>Označen novi nepoznati dobavljač.</strong> „TechServis d.o.o." primio €8.200 dana 24. maja — nema historije transakcija. Zahtijeva vašu provjeru.',
+    fullBrief5:'<strong>Otkrivena neusklađenost u izvještavanju.</strong> BIH Operations 2 prijavio prihod od €48.000. Banka pokazuje €45.385. Razlika €2.615 (5,4%) označena za pojašnjenje.',
+    fullBrief6:'<strong>3 sumnjive duple uplate.</strong> Ukupna izloženost: €12.400. Dva para uključuju istog dobavljača u kratkom vremenskom razmaku. Jedan par prelazi dva računa.',
+    fullBrief7:'<strong>Potrošnja na profesionalne usluge porasla 240%</strong> u BIH Operations 2. Glavni uzrok: €17.200 pravnoj konzultantskoj firmi 19. februara.',
+    fullBriefingFooter:'Podaci direktno iz bankovnih feedova — neovisno od izvještaja zaposlenika',
+    fullBriefingNext:'Sljedeće automatsko ažuriranje: 17:00 danas',
+    briefingNote:'Ovaj izvještaj se automatski generiše iz živih bankovnih podataka. Nije zasnovan na izvještajima zaposlenika. Sve cifre su sirovi podaci o transakcijama. Označene stavke zahtijevaju vašu pažnju do kraja radnog dana.',
+    scorecardTitle:'🏆 Skor Zdravlja Kompanije — Rang',
+    scorecardVerified:'✓ Skori bazirani na živim bankovnim podacima',
+    scorecardDesc:'Kompozitni skor 0–100: Likvidnosna Rezerva · Trend Prihoda · Rast Rashoda · Broj Anomalija · Stabilnost Bilansa. Rangirani od najboljeg → najgorijeg.',
+    scorecardBarTitle:'Raščlanjivanje Komponenti Skora',
+    anomalyTitle:'⚡ Anomalije — Feed Aktivnih Upozorenja',
+    anomalyActive:'7 Aktivnih Upozorenja',
+    heatmapTitle:'Mapa Anomalija — Maj 2026. (tamnije = više anomalija)',
+    anomalyBarTitle:'Učestalost Anomalija po Računu',
+    alertFeedTitle:'Feed Upozorenja',
+    trustTitle:'🔍 Sloj Provjere Pouzdanosti',
+    trustDesc:'Prijavljene cifre vs. bankarska stvarnost — neovisna provjera',
+    trustVerified:'🔒 Posljednja provjera: danas, 09:41',
+    thCompany:'Kompanija', thAccount:'Račun', thRepInc:'Prijavljeni Prihod', thBankInc:'Bankarski Prihod',
+    thRepExp:'Prijavljeni Rashodi', thBankExp:'Bankarski Rashodi', thIncMatch:'Usklađenost Prihoda', thExpMatch:'Usklađenost Rashoda',
+    trustIncTitle:'Prijavljeno vs. Banka — Prihodi',
+    trustExpTitle:'Prijavljeno vs. Banka — Rashodi',
+    dupTitle:'🔎 Skener Duplikata i Fantomskih Uplata',
+    dupExposure:'Potencijalna duplikat<br>izloženost ovog kvartala',
+    dupPairs:'Sumnjivi parovi<br>na čekanju provjere',
+    dupResolved:'Provjereno i riješeno<br>ovog mjeseca',
+    dupBarTitle:'Izloženost Duplikatima po Računu (€)',
+    dupHowTitle:'Kako Skener Funkcioniše',
+    dupHow1:'✓ Skenira sve transakcije na svih 6 računa',
+    dupHow2:'✓ Označava parove: isti dobavljač ± isti iznos ± unutar 30 dana',
+    dupHow3:'✓ Dodjeljuje skor pouzdanosti (podudarnost iznosa + timing + sličnost primatelja)',
+    dupHow4:'✓ Rješavanje jednim klikom — Legitimno ili Označi za Pregled',
+    dupNote:'⚠ Detekcija na više računa nije moguća u standardnim bankovnim aplikacijama. Ovaj skener pokriva svih 6 računa istovremeno.',
+    totalCashLabel:'Ukupno Raspoloživa Gotovina — Svi Računi',
+    totalCashSub1:'6 računa · 2 države · EUR ekvivalent',
+    totalCashSub2:'Konvertovano po današnjem kursu BAM/EUR',
+    accLow:'⚠ Nizak saldo', accCritical:'🔴 Kritično — 18 dana do nule',
+    categoryBarTitle:'Detaljna Analiza — Rashodi po Kategoriji',
+    sumAccount:'Račun', sumCountry:'Država', sumCurrency:'Valuta',
+    sumIncome:'Prihodi', sumExpenses:'Rashodi', sumNet:'Neto', sumBalance:'Saldo', sumTotal:'UKUPNO',
+    ctSlovenia:'Slovenija', ctBosnia:'Bosna',
+    cLabelJanuary:'Januar', cLabelFebruary:'Februar',
+    cLabelIncome:'Prihodi', cLabelExpenses:'Rashodi',
+    cLabelReported:'Prijavljeno', cLabelBank:'Banka',
+    cLabelDupExposure:'Izloženost Duplikatima',
+    cLabelLiquidity:'Likvidnost', cLabelTrend:'Trend', cLabelRisk:'Rizik', cLabelEfficiency:'Efikasnost',
+    cLabelAlerts:'upozorenja', cLabelAlert:'upozorenje',
+    pillLiq:'Lik', pillTrend:'Trend', pillRisk:'Rizik', pillEff:'Eff',
+    pillTipLiq:'Likvidnosna Rezerva', pillTipTrend:'Trend Prihoda', pillTipRisk:'Anomalije & Rizik Prevare', pillTipEff:'Efikasnost Troškova',
+    scRankOf:'od',
+    matchOk:'✓ Usklađeno', matchMinor:'⚠ Mala razlika', matchMismatch:'⛔ Neusklađeno',
+    btnInvestigate:'Istraži', btnDismiss:'Odbaci',
+    btnLegit:'✓ Označi kao Legitimno', btnFlag:'⛔ Označi za Pregled', btnFlagged:'🚩 Označeno',
+    daysApart:'dana razlike',
+    likelyDup:'% vjerovatno duplikat',
+    hmNoAnomalies:'Bez anomalija', hmAnomalies:'anomalija', hmAnomaliesPlural:'anomalija',
+    alerts:[
+      {sev:'high',desc:'Nepoznati dobavljač „TechServis d.o.o." — €8.200',meta:'BIH Operations 2 · 24. maj'},
+      {sev:'high',desc:'Transakcija 240% iznad prosječne kategorije — Profesionalne usluge',meta:'BIH Operations 2 · 19. maj · €17.200'},
+      {sev:'high',desc:'Vikend transfer €23.625 na vanjski račun',meta:'SLO Plata · 04. feb'},
+      {sev:'med',desc:'Novi primatelj — prvi put „AdServis j.d.o.o." — €1.840',meta:'SLO Glavne Operacije · 16. maj'},
+      {sev:'med',desc:'Duplikat obrazac — isti iznos, razmak 3 dana',meta:'BIH Rezerva · €4.600 × 2'},
+      {sev:'med',desc:'Isplata plaće 18% iznad prošlog mjeseca',meta:'BIH Plata · 01. maj · €33.188'},
+      {sev:'low',desc:'Skok bankovnih naknada — €340 vs prosjek €52/mj',meta:'BIH Operations 1 · april'},
+    ],
+    cats:[['Plata',198918],['Marketing',19099],['Profesionalne usluge',17924],['Putovanja i transport',12579],['Zakup ureda',8696],['Osiguranje',6413],['Obuka',5750],['Softver',5604],['Komunalije',1966],['Uredski materijal',1496],['Telekom',924],['Bankarske naknade',620]],
+    accShort:['SLO Glavne','SLO Plata','BIH Ops 1','BIH Ops 2','BIH Plata','BIH Rezerva'],
+    trustNames:['SLO Glavne','SLO Plata','BIH Ops 1','BIH Ops 2','BIH Plata','BIH Rezerva'],
+    dupAccLabels:['BIH Operations 2','BIH Rezerva','SLO Glavne','BIH Operations 1'],
+    scorecardCompanyNames:['SLO Glavne','SLO Plata','BIH Rezerva','BIH Ops 2','BIH Ops 1','BIH Plata'],
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════
+// STATE & CHARTS REGISTRY
+// ══════════════════════════════════════════════════════════════════
+let currentLang = 'en';
+const charts = {}; // keyed by canvas id
+
+// ══════════════════════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════════════════════
+function nav(el, id) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pg-' + id).classList.add('active');
+  // close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+}
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CHART DEFAULTS
+// ══════════════════════════════════════════════════════════════════
+Chart.defaults.font.family = "system-ui,-apple-system,'Segoe UI',sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.plugins.legend.display = false;
+const eur = v => '€' + Number(v).toLocaleString();
+
+// ══════════════════════════════════════════════════════════════════
+// CHART HELPERS — destroy & recreate
+// ══════════════════════════════════════════════════════════════════
+function mkChart(id, config){
+  if(charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id), config);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// DATA (shared)
+// ══════════════════════════════════════════════════════════════════
+const cfData=[1399,-5140,9161,-1981,-1139,2712,3481,7241,-6573,-3186,-7665,-4377,578,-5608,45304,5904,-2874,-8253,-8574,27626,15373,9583,-102,6808,-3291,2599,-4442,316,-473,2989,41485,-4364,-23625,982,-5545,12334,-76,-494,2452,-246,509,10418,-3396,16112,2442,-1141,-38,-10434,8657,-10674,7980,-4799,-64];
+const cfLabels=["01-01","01-02","01-03","01-05","01-06","01-07","01-08","01-09","01-10","01-11","01-12","01-13","01-14","01-15","01-16","01-17","01-18","01-19","01-20","01-21","01-22","01-23","01-25","01-26","01-27","01-28","01-29","01-30","01-31","02-01","02-02","02-03","02-04","02-05","02-06","02-09","02-10","02-11","02-12","02-13","02-15","02-16","02-17","02-18","02-19","02-20","02-22","02-23","02-24","02-25","02-26","02-27","02-28"];
+const trustData=[
+  {acc:'SLO Main Operations',repInc:79578,bankInc:79578,repExp:26675,bankExp:26675},
+  {acc:'SLO Payroll',repInc:154085,bankInc:154085,repExp:126829,bankExp:126829},
+  {acc:'BIH Operations 1',repInc:23800,bankInc:23496,repExp:18713,bankExp:18713},
+  {acc:'BIH Operations 2',repInc:48000,bankInc:45385,repExp:26428,bankExp:26428},
+  {acc:'BIH Payroll',repInc:33188,bankInc:33188,repExp:55556,bankExp:55556},
+  {acc:'BIH Reserve',repInc:60129,bankInc:60129,repExp:25789,bankExp:24900},
+];
+const companies=[
+  {name:"SLO Main Operations",country:"Slovenia",score:84,liq:88,trend:82,risk:90,eff:76,color:"#1E8449"},
+  {name:"SLO Payroll",country:"Slovenia",score:78,liq:75,trend:80,risk:82,eff:73,color:"#1E8449"},
+  {name:"BIH Reserve",country:"Bosnia",score:72,liq:80,trend:68,risk:75,eff:66,color:"#1A73E8"},
+  {name:"BIH Operations 2",country:"Bosnia",score:61,liq:65,trend:58,risk:55,eff:67,color:"#D4AC0D"},
+  {name:"BIH Operations 1",country:"Bosnia",score:54,liq:48,trend:60,risk:62,eff:48,color:"#D4AC0D"},
+  {name:"BIH Payroll",country:"Bosnia",score:31,liq:18,trend:40,risk:28,eff:42,color:"#C0392B"},
+];
+const anomalyDays={1:0,2:0,3:1,4:0,5:1,6:0,7:0,8:2,9:0,10:1,11:0,12:0,13:0,14:1,15:0,16:3,17:1,18:0,19:2,20:0,21:1,22:0,23:0,24:2,25:1,26:0,27:1};
+const dups=[
+  {vendor:'Avto Servis Plus d.o.o.',conf:92,confLabel:'high',pairs:[{acc:'BIH Operations 2',date:'May 03',amt:4600},{acc:'BIH Reserve',date:'May 06',amt:4600}]},
+  {vendor:'Marketing Pro Agency',conf:78,confLabel:'med',pairs:[{acc:'SLO Main Operations',date:'Apr 28',amt:2400},{acc:'SLO Main Operations',date:'May 02',amt:2400}]},
+  {vendor:'TechServis d.o.o.',conf:71,confLabel:'med',pairs:[{acc:'BIH Operations 1',date:'May 18',amt:2700},{acc:'BIH Operations 2',date:'May 21',amt:2700}]},
+];
+
+// ══════════════════════════════════════════════════════════════════
+// BUILD ALL CHARTS for current language
+// ══════════════════════════════════════════════════════════════════
+function buildCharts(){
+  const t = T[currentLang];
+
+  // Cash flow
+  mkChart('cashflowChart',{
+    type:'line',
+    data:{labels:cfLabels,datasets:[{data:cfData,borderColor:'#1A73E8',backgroundColor:'rgba(26,115,232,0.07)',fill:true,tension:0.35,pointRadius:1.5,pointHoverRadius:5,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>eur(c.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:10,font:{size:10}}},y:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'K',font:{size:10}},grid:{color:'#E2E6EA'}}}}
+  });
+
+  // Monthly bar
+  mkChart('monthlyBar',{
+    type:'bar',
+    data:{labels:[t.cLabelJanuary,t.cLabelFebruary],datasets:[
+      {label:t.cLabelIncome,data:[218449,177412],backgroundColor:'#1E8449',borderRadius:5},
+      {label:t.cLabelExpenses,data:[144042,135949],backgroundColor:'#C0392B',borderRadius:5}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,font:{size:10}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+eur(c.parsed.y)}}},scales:{y:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'K',font:{size:10}}},x:{grid:{display:false}}}}
+  });
+
+  // Expense pie
+  mkChart('expensePie',{
+    type:'doughnut',
+    data:{labels:t.cats.map(c=>c[0]),datasets:[{data:t.cats.map(c=>c[1]),backgroundColor:['#1A73E8','#1E8449','#C0392B','#D4AC0D','#7D3C98','#117A65','#2980B9','#E67E22','#5F6368','#95A5A6','#F39C12','#1B5E20']}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'right',labels:{boxWidth:10,font:{size:9}}},tooltip:{callbacks:{label:c=>c.label+': '+eur(c.parsed)}}}}
+  });
+
+  // Balance bar
+  mkChart('balanceBar',{
+    type:'bar',
+    data:{labels:t.accShort,datasets:[{data:[99038,68174,50529,35214,21710,14579],backgroundColor:['#1E8449','#1E8449','#1A73E8','#1A73E8','#D4AC0D','#C0392B'],borderRadius:5}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>eur(c.parsed.x)}}},scales:{x:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'K',font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+
+  // Scorecard bar
+  mkChart('scorecardBar',{
+    type:'bar',
+    data:{
+      labels:t.scorecardCompanyNames,
+      datasets:[
+        {label:t.cLabelLiquidity,data:companies.map(c=>c.liq),backgroundColor:'rgba(26,115,232,.7)',borderRadius:3},
+        {label:t.cLabelTrend,data:companies.map(c=>c.trend),backgroundColor:'rgba(30,132,73,.7)',borderRadius:3},
+        {label:t.cLabelRisk,data:companies.map(c=>c.risk),backgroundColor:'rgba(125,60,152,.7)',borderRadius:3},
+        {label:t.cLabelEfficiency,data:companies.map(c=>c.eff),backgroundColor:'rgba(212,172,13,.7)',borderRadius:3},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{max:100,ticks:{font:{size:10}}}}}
+  });
+
+  // Anomaly bar
+  mkChart('anomalyBar',{
+    type:'bar',
+    data:{labels:t.accShort,datasets:[{data:[1,2,1,3,2,1],backgroundColor:['#D4AC0D','#C0392B','#D4AC0D','#C0392B','#C0392B','#D4AC0D'],borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>`${c.parsed.y} ${c.parsed.y!==1?t.cLabelAlerts:t.cLabelAlert}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{ticks:{stepSize:1,font:{size:10}}}}}
+  });
+
+  // Trust income bar
+  mkChart('trustIncomeBar',{
+    type:'bar',
+    data:{labels:t.trustNames,datasets:[
+      {label:t.cLabelReported,data:trustData.map(d=>d.repInc),backgroundColor:'rgba(26,115,232,0.6)',borderRadius:4},
+      {label:t.cLabelBank,data:trustData.map(d=>d.bankInc),backgroundColor:'rgba(30,132,73,0.6)',borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,font:{size:10}}},tooltip:{callbacks:{label:c=>c.dataset.label+': €'+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'K',font:{size:10}}}}}
+  });
+
+  // Trust expense bar
+  mkChart('trustExpenseBar',{
+    type:'bar',
+    data:{labels:t.trustNames,datasets:[
+      {label:t.cLabelReported,data:trustData.map(d=>d.repExp),backgroundColor:'rgba(192,57,43,0.6)',borderRadius:4},
+      {label:t.cLabelBank,data:trustData.map(d=>d.bankExp),backgroundColor:'rgba(212,172,13,0.7)',borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,font:{size:10}}},tooltip:{callbacks:{label:c=>c.dataset.label+': €'+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'K',font:{size:10}}}}}
+  });
+
+  // Duplicates bar
+  mkChart('dupBar',{
+    type:'bar',
+    data:{labels:t.dupAccLabels,datasets:[{data:[7300,4600,4800,2700],backgroundColor:['#C0392B','#D4AC0D','#D4AC0D','#E67E22'],borderRadius:5,label:t.cLabelDupExposure}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>'€'+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'K',font:{size:10}}}}}
+  });
+
+  // Category bar
+  mkChart('categoryBar',{
+    type:'bar',
+    data:{labels:t.cats.map(c=>c[0]),datasets:[{data:t.cats.map(c=>c[1]),backgroundColor:'#C0392B',borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>eur(c.parsed.x)}}},scales:{x:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'K',font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// BUILD DYNAMIC HTML SECTIONS
+// ══════════════════════════════════════════════════════════════════
+function buildHeatmap(){
+  const t=T[currentLang];
+  const hm=document.getElementById('heatmap');
+  hm.innerHTML='';
+  for(let d=1;d<=31;d++){
+    const v=anomalyDays[d]||0;
+    const opacity=v===0?0.08:v===1?0.35:v===2?0.65:0.92;
+    const bg=v===0?`rgba(200,200,200,${opacity})`:`rgba(192,57,43,${opacity})`;
+    const tip=v===0?`May ${d}: ${t.hmNoAnomalies}`:`May ${d}: ${v} ${v>1?t.hmAnomaliesPlural:t.hmAnomalies}`;
+    hm.innerHTML+=`<div class="hm-cell" style="background:${bg}" data-tip="${tip}"></div>`;
+  }
+}
+
+function buildAlertFeed(){
+  const t=T[currentLang];
+  const feed=document.getElementById('alert-feed');
+  feed.innerHTML='';
+  t.alerts.forEach(a=>{
+    feed.innerHTML+=`<div class="alert-card ${a.sev}"><div class="alert-dot ${a.sev}"></div><div class="alert-body"><div class="alert-desc">${a.desc}</div><div class="alert-meta">${a.meta}</div><div class="alert-actions"><button class="btn-sm investigate" onclick="this.closest('.alert-card').style.opacity='.4'">${t.btnInvestigate}</button><button class="btn-sm" onclick="this.closest('.alert-card').style.opacity='.4'">${t.btnDismiss}</button></div></div></div>`;
+  });
+}
+
+function buildTrustTable(){
+  const t=T[currentLang];
+  function matchBadge(rep,bank){
+    const diff=Math.abs(rep-bank),pct=diff/rep*100;
+    if(diff===0)return`<span class="match-badge ok">${t.matchOk}</span>`;
+    if(pct<3)return`<span class="match-badge warn">${t.matchMinor}<div class="discrepancy">−€${diff.toLocaleString()}</div></span>`;
+    return`<span class="match-badge flag">${t.matchMismatch}<div class="discrepancy">−€${diff.toLocaleString()}</div></span>`;
+  }
+  const tbody=document.getElementById('trust-tbody');
+  tbody.innerHTML='';
+  const countries=['Slovenia','Slovenia','Bosnia','Bosnia','Bosnia','Bosnia'];
+  const ctLabels=[t.ctSlovenia,t.ctSlovenia,t.ctBosnia,t.ctBosnia,t.ctBosnia,t.ctBosnia];
+  trustData.forEach((r,i)=>{
+    tbody.innerHTML+=`<tr>
+      <td><strong>${r.acc}</strong></td><td>${ctLabels[i]}</td>
+      <td class="num">€${r.repInc.toLocaleString()}</td>
+      <td class="num">€${r.bankInc.toLocaleString()}</td>
+      <td class="num">€${r.repExp.toLocaleString()}</td>
+      <td class="num">€${r.bankExp.toLocaleString()}</td>
+      <td>${matchBadge(r.repInc,r.bankInc)}</td>
+      <td>${matchBadge(r.repExp,r.bankExp)}</td>
+    </tr>`;
+  });
+}
+
+function buildDupPairs(){
+  const t=T[currentLang];
+  const dpEl=document.getElementById('dup-pairs');
+  dpEl.innerHTML='';
+  dups.forEach(d=>{
+    const dayDiff=Math.abs(new Date('2026-05-'+d.pairs[1].date.split(' ')[1].replace(',',''))-new Date('2026-05-'+d.pairs[0].date.split(' ')[1].replace(',','')))/86400000||3;
+    dpEl.innerHTML+=`<div class="dup-pair">
+      <div class="dup-pair-header">
+        <div class="dup-vendor">${d.vendor}</div>
+        <div class="confidence ${d.confLabel}">${d.conf}${t.likelyDup}</div>
+      </div>
+      <div class="dup-rows">
+        <div class="dup-row"><div class="dup-row-left"><strong>${d.pairs[0].acc}</strong>${d.pairs[0].date}</div><div class="dup-amount">−€${d.pairs[0].amt.toLocaleString()}</div></div>
+        <div class="dup-bracket">⟵ ${t.daysApart.replace('days apart','')} ${dayDiff} ${t.daysApart} ⟶</div>
+        <div class="dup-row"><div class="dup-row-left"><strong>${d.pairs[1].acc}</strong>${d.pairs[1].date}</div><div class="dup-amount">−€${d.pairs[1].amt.toLocaleString()}</div></div>
+      </div>
+      <div class="dup-actions">
+        <button class="btn-legit" onclick="this.closest('.dup-pair').style.opacity='.35'">${t.btnLegit}</button>
+        <button class="btn-flag" onclick="this.closest('.dup-pair').style.opacity='.35';this.textContent='${t.btnFlagged}'">${t.btnFlag}</button>
+      </div>
+    </div>`;
+  });
+}
+
+function buildScorecard(){
+  const t=T[currentLang];
+  const grid=document.getElementById('scorecard-grid');
+  grid.innerHTML='';
+  companies.forEach((c,i)=>{
+    const r=38,cx=45,cy=45,circ=2*Math.PI*r,pct=c.score/100;
+    const pill=(lbl,val,tip)=>{
+      const col=val>=70?'g':val>=50?'a':'r';
+      return`<div class="sc-pill ${col}" data-tip="${tip}: ${val}/100">${lbl} ${val}</div>`;
+    };
+    grid.innerHTML+=`
+    <div class="scorecard-item">
+      <div class="sc-rank">#${i+1} ${t.scRankOf} 6</div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 90 90">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#E2E6EA" stroke-width="7"/>
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c.color}" stroke-width="7"
+            stroke-dasharray="${circ*pct} ${circ*(1-pct)}" stroke-dashoffset="${circ*0.25}"
+            stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
+        </svg>
+        <div class="gauge-score"><div class="gauge-num" style="color:${c.color}">${c.score}</div><div class="gauge-lbl">/ 100</div></div>
+      </div>
+      <div class="sc-name">${c.name}</div>
+      <div class="sc-country">${i<2?t.ctSlovenia:t.ctBosnia}</div>
+      <div class="sc-pills">
+        ${pill(t.pillLiq,c.liq,t.pillTipLiq)}
+        ${pill(t.pillTrend,c.trend,t.pillTipTrend)}
+        ${pill(t.pillRisk,c.risk,t.pillTipRisk)}
+        ${pill(t.pillEff,c.eff,t.pillTipEff)}
+      </div>
+    </div>`;
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// APPLY ALL i18n TEXT NODES
+// ══════════════════════════════════════════════════════════════════
+function applyTranslations(){
+  const t=T[currentLang];
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key=el.getAttribute('data-i18n');
+    if(t[key]!==undefined) el.innerHTML=t[key];
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LANGUAGE SWITCH
+// ══════════════════════════════════════════════════════════════════
+function setLang(lang, btn){
+  currentLang=lang;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyTranslations();
+  buildScorecard();
+  buildHeatmap();
+  buildAlertFeed();
+  buildTrustTable();
+  buildDupPairs();
+  buildCharts();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+applyTranslations();
+buildScorecard();
+buildHeatmap();
+buildAlertFeed();
+buildTrustTable();
+buildDupPairs();
+buildCharts();
+</script>
+</body>
+</html>
